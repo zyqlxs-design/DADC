@@ -15,6 +15,7 @@ from .importer import (
     ingest_touchstone_inductor_repository,
 )
 from .field_bundle import FieldBundleIngestionResult, ingest_joule_thermal_field_bundle
+from .tabular import TabularIngestionResult, ingest_tabular_experiment_repository
 
 _TOUCHSTONE_SUFFIX = re.compile(r"\.s(?P<ports>[1-9][0-9]*)p$", re.IGNORECASE)
 
@@ -26,9 +27,40 @@ class ProbeResult:
     reason: str
 
 
+@dataclass(frozen=True)
+class AdapterCapability:
+    """Machine-readable declaration of one installed adapter's safe boundary."""
+
+    adapter_id: str
+    adapter_version: str
+    source_kinds: tuple[str, ...]
+    source_formats: tuple[str, ...]
+    device_classes: tuple[str, ...]
+    activity_types: tuple[str, ...]
+    physics_domains: tuple[str, ...]
+    automation_level: str
+    manifest_required: bool
+    maturity: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "adapter_id": self.adapter_id,
+            "adapter_version": self.adapter_version,
+            "source_kinds": list(self.source_kinds),
+            "source_formats": list(self.source_formats),
+            "device_classes": list(self.device_classes),
+            "activity_types": list(self.activity_types),
+            "physics_domains": list(self.physics_domains),
+            "automation_level": self.automation_level,
+            "manifest_required": self.manifest_required,
+            "maturity": self.maturity,
+        }
+
+
 class SourceAdapter(Protocol):
     adapter_id: str
     adapter_version: str
+    capability: AdapterCapability
 
     def probe(self, source: Path, intake: dict[str, Any]) -> ProbeResult:
         """Score whether this adapter can safely interpret ``source``."""
@@ -38,13 +70,25 @@ class SourceAdapter(Protocol):
         source: Path,
         target: Path,
         intake: dict[str, Any],
-    ) -> TouchstoneIngestionResult | FieldBundleIngestionResult:
+    ) -> TouchstoneIngestionResult | FieldBundleIngestionResult | TabularIngestionResult:
         """Build and validate one staged DADC repository."""
 
 
 class TouchstoneRFFilterAdapter:
     adapter_id = "touchstone_rf_filter"
     adapter_version = "1.0.0"
+    capability = AdapterCapability(
+        adapter_id=adapter_id,
+        adapter_version=adapter_version,
+        source_kinds=("simulation_export",),
+        source_formats=("Touchstone .s2p+",),
+        device_classes=("rf_filter",),
+        activity_types=("simulation_run",),
+        physics_domains=("electromagnetics",),
+        automation_level="automatic_with_manifest",
+        manifest_required=True,
+        maturity="validated",
+    )
 
     def probe(self, source: Path, intake: dict[str, Any]) -> ProbeResult:
         match = _TOUCHSTONE_SUFFIX.search(source.name)
@@ -104,6 +148,18 @@ class TouchstoneRFFilterAdapter:
 class TouchstoneAntennaAdapter:
     adapter_id = "touchstone_antenna"
     adapter_version = "1.0.0"
+    capability = AdapterCapability(
+        adapter_id=adapter_id,
+        adapter_version=adapter_version,
+        source_kinds=("simulation_export",),
+        source_formats=("Touchstone .s1p",),
+        device_classes=("antenna",),
+        activity_types=("simulation_run",),
+        physics_domains=("electromagnetics",),
+        automation_level="automatic_with_manifest",
+        manifest_required=True,
+        maturity="validated",
+    )
 
     def probe(self, source: Path, intake: dict[str, Any]) -> ProbeResult:
         match = _TOUCHSTONE_SUFFIX.search(source.name)
@@ -162,6 +218,18 @@ class TouchstoneInductorAdapter:
 
     adapter_id = "touchstone_inductor"
     adapter_version = "1.0.0"
+    capability = AdapterCapability(
+        adapter_id=adapter_id,
+        adapter_version=adapter_version,
+        source_kinds=("vendor_measurement", "vendor_datasheet"),
+        source_formats=("Touchstone .s2p", "PDF companion"),
+        device_classes=("inductor",),
+        activity_types=("experiment_run", "literature_record", "data_processing"),
+        physics_domains=("electromagnetics",),
+        automation_level="automatic_with_manifest_and_pinned_companion",
+        manifest_required=True,
+        maturity="validated",
+    )
 
     def probe(self, source: Path, intake: dict[str, Any]) -> ProbeResult:
         match = _TOUCHSTONE_SUFFIX.search(source.name)
@@ -253,6 +321,18 @@ class JouleThermalFieldBundleAdapter:
 
     adapter_id = "joule_thermal_field_bundle"
     adapter_version = "1.0.0"
+    capability = AdapterCapability(
+        adapter_id=adapter_id,
+        adapter_version=adapter_version,
+        source_kinds=("simulation_bundle",),
+        source_formats=("DADC Joule-thermal JSON+CSV bundle",),
+        device_classes=("power_resistor",),
+        activity_types=("simulation_run", "data_processing"),
+        physics_domains=("electromagnetics", "thermal"),
+        automation_level="automatic_for_self_checking_bundle",
+        manifest_required=True,
+        maturity="validated",
+    )
 
     def probe(self, source: Path, intake: dict[str, Any]) -> ProbeResult:
         if source.suffix.lower() != ".json":
@@ -297,6 +377,54 @@ class JouleThermalFieldBundleAdapter:
         )
 
 
+class TabularExperimentCSVAdapter:
+    """Interpret explicitly described real or complex experimental CSV curves."""
+
+    adapter_id = "tabular_experiment_csv"
+    adapter_version = "1.0.0"
+    capability = AdapterCapability(
+        adapter_id=adapter_id,
+        adapter_version=adapter_version,
+        source_kinds=("laboratory_measurement", "instrument_export"),
+        source_formats=("CSV with explicit DADC intake manifest",),
+        device_classes=("*",),
+        activity_types=("experiment_run", "data_processing"),
+        physics_domains=("*",),
+        automation_level="automatic_with_explicit_semantic_manifest",
+        manifest_required=True,
+        maturity="validated_minimal",
+    )
+
+    def probe(self, source: Path, intake: dict[str, Any]) -> ProbeResult:
+        if source.suffix.lower() != ".csv":
+            return ProbeResult(self.adapter_id, 0.0, "tabular experiment adapter requires .csv")
+        if intake.get("activity_type") not in (None, "experiment_run"):
+            return ProbeResult(
+                self.adapter_id,
+                0.0,
+                "tabular experiment adapter requires activity_type=experiment_run",
+            )
+        if not isinstance(intake.get("tabular_contract"), dict):
+            return ProbeResult(
+                self.adapter_id,
+                0.40,
+                "CSV suffix is insufficient; explicit tabular_contract is required",
+            )
+        return ProbeResult(
+            self.adapter_id,
+            0.99,
+            "CSV suffix and explicit tabular_contract",
+        )
+
+    def build_case_repository(
+        self,
+        source: Path,
+        target: Path,
+        intake: dict[str, Any],
+    ) -> TabularIngestionResult:
+        return ingest_tabular_experiment_repository(source, target, intake=intake)
+
+
 class AdapterRegistry:
     """Select exactly one adapter; ambiguous and unknown inputs are rejected."""
 
@@ -306,6 +434,15 @@ class AdapterRegistry:
             TouchstoneAntennaAdapter(),
             TouchstoneInductorAdapter(),
             JouleThermalFieldBundleAdapter(),
+            TabularExperimentCSVAdapter(),
+        ]
+
+    def catalog(self) -> list[dict[str, Any]]:
+        """Return stable JSON-ready capability declarations for agent planning."""
+
+        return [
+            adapter.capability.to_dict()
+            for adapter in sorted(self.adapters, key=lambda item: item.adapter_id)
         ]
 
     def select(self, source: Path, intake: dict[str, Any]) -> tuple[SourceAdapter, ProbeResult]:
