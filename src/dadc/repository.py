@@ -364,6 +364,11 @@ class DADCRepository:
                 "Provenance", artifact["provenance_id"]
             )
 
+        # A Metric is produced by its own Run, which can differ from the Run
+        # that produced the source Observable (for example experiment -> data
+        # processing). Include both sides so lineage never skips the extraction
+        # activity that calculated the reported value.
+        collect_run(metric["run_id"])
         for observable_id in metric["source_observable_ids"]:
             collect_observable(observable_id)
 

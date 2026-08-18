@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/schemas/v1.0/device_profiles/generic_component.schema.json",
+  "title": "Generic component extension for explicit intake manifests",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["generic_component"],
+  "properties": {
+    "generic_component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity_basis", "attributes"],
+      "properties": {
+        "identity_basis": {"const": "explicit_intake_manifest"},
+        "attributes": {"type": "object"}
+      }
+    }
+  }
+}

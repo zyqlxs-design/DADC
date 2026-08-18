@@ -102,6 +102,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     init_parser.add_argument("data_root")
 
+    subparsers.add_parser(
+        "adapters",
+        help="print the machine-readable capability boundary of installed source adapters",
+    )
+
     ingest_parser = subparsers.add_parser(
         "ingest",
         help="detect an adapter and append one source (or a folder of manifests) to a shared warehouse",
@@ -179,6 +184,16 @@ def main(argv: list[str] | None = None) -> int:
         from .warehouse import initialize_data_root
 
         _print_json(initialize_data_root(args.data_root))
+        return 0
+    if args.command == "adapters":
+        from .ingestion.registry import AdapterRegistry
+
+        _print_json(
+            {
+                "adapter_catalog_version": "1.0",
+                "adapters": AdapterRegistry().catalog(),
+            }
+        )
         return 0
     if args.command == "ingest":
         from .warehouse import WarehouseManager

@@ -1,0 +1,101 @@
+{
+  "intake_schema_version": "1.0",
+  "source": "generic_experiment.csv",
+  "adapter": "tabular_experiment_csv",
+  "case_id": "thermistor_csv_exp_001",
+  "device_name": "NTC thermistor voltage-current experiment",
+  "device_class": "thermistor",
+  "device_subtype": "ntc_thermistor",
+  "physics_domains": [
+    "electromagnetics",
+    "thermal"
+  ],
+  "activity_type": "experiment_run",
+  "source_timestamp": "2026-08-18T14:00:00+08:00",
+  "processed_at": "2026-08-18T14:05:00Z",
+  "operator_id": "fixture_operator",
+  "platform": "laboratory_bench",
+  "compute": "local_cpu",
+  "experiment_context": {
+    "instrument": "DADC fixture source meter",
+    "instrument_version": "1.0",
+    "calibration": "fixture calibration certificate CAL-001",
+    "ambient_temperature_K": 298.15
+  },
+  "device_attributes": {
+    "manufacturer": "fixture_vendor",
+    "part_number": "NTC-TEST-10K"
+  },
+  "tabular_contract": {
+    "encoding": "utf-8",
+    "delimiter": ",",
+    "axis": {
+      "column": "time_s",
+      "name": "time",
+      "unit": "s",
+      "strictly_increasing": true
+    },
+    "observables": [
+      {
+        "id_suffix": "voltage",
+        "observable_type": "curve",
+        "quantity": "electric_potential",
+        "complex_representation": "not_applicable",
+        "components": [
+          {
+            "name": "voltage",
+            "column": "voltage_v",
+            "unit": "V"
+          }
+        ]
+      },
+      {
+        "id_suffix": "current",
+        "observable_type": "curve",
+        "quantity": "electric_current",
+        "complex_representation": "not_applicable",
+        "components": [
+          {
+            "name": "current",
+            "column": "current_a",
+            "unit": "A"
+          }
+        ]
+      },
+      {
+        "id_suffix": "impedance",
+        "observable_type": "response",
+        "quantity": "complex_impedance",
+        "complex_representation": "real_imaginary",
+        "components": [
+          {
+            "name": "Z",
+            "real_column": "z_real_ohm",
+            "imaginary_column": "z_imag_ohm",
+            "unit": "ohm"
+          }
+        ]
+      }
+    ],
+    "metrics": [
+      {
+        "id_suffix": "maximum_current",
+        "name": "Maximum measured current",
+        "quantity": "maximum_electric_current",
+        "observable": "current",
+        "component": "current",
+        "operation": "max",
+        "unit": "A"
+      },
+      {
+        "id_suffix": "minimum_impedance_magnitude",
+        "name": "Minimum impedance magnitude",
+        "quantity": "minimum_impedance_magnitude",
+        "observable": "impedance",
+        "component": "Z",
+        "operation": "magnitude_min",
+        "unit": "ohm"
+      }
+    ]
+  }
+}

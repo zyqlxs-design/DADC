@@ -1,0 +1,81 @@
+{
+  "intake_schema_version": "1.0",
+  "source": "photodiode_spectral_experiment.csv",
+  "adapter": "tabular_experiment_csv",
+  "case_id": "photodiode_spectral_exp_001",
+  "device_name": "Silicon photodiode spectral-response experiment",
+  "device_class": "photodiode",
+  "device_subtype": "silicon_pin_photodiode",
+  "physics_domains": [
+    "optical",
+    "electromagnetics"
+  ],
+  "activity_type": "experiment_run",
+  "source_timestamp": "2026-08-18T15:00:00+08:00",
+  "processed_at": "2026-08-18T15:05:00Z",
+  "operator_id": "fixture_operator",
+  "platform": "optical_bench",
+  "compute": "local_cpu",
+  "experiment_context": {
+    "instrument": "DADC fixture monochromator and source meter",
+    "instrument_version": "1.0",
+    "calibration": "fixture wavelength calibration certificate OPT-001",
+    "incident_optical_power_W": 0.001,
+    "ambient_temperature_K": 298.15
+  },
+  "device_attributes": {
+    "manufacturer": "fixture_vendor",
+    "part_number": "PD-TEST-SI",
+    "active_area_mm2": 1.0,
+    "window_material": "fixture_glass"
+  },
+  "tabular_contract": {
+    "encoding": "utf-8",
+    "delimiter": ";",
+    "axis": {
+      "column": "wavelength_nm",
+      "name": "wavelength",
+      "unit": "nm",
+      "strictly_increasing": true
+    },
+    "observables": [
+      {
+        "id_suffix": "responsivity",
+        "observable_type": "response",
+        "quantity": "spectral_responsivity",
+        "complex_representation": "not_applicable",
+        "components": [
+          {
+            "name": "responsivity",
+            "column": "responsivity_a_per_w",
+            "unit": "A/W"
+          }
+        ]
+      },
+      {
+        "id_suffix": "photocurrent",
+        "observable_type": "curve",
+        "quantity": "photocurrent",
+        "complex_representation": "not_applicable",
+        "components": [
+          {
+            "name": "photocurrent",
+            "column": "photocurrent_a",
+            "unit": "A"
+          }
+        ]
+      }
+    ],
+    "metrics": [
+      {
+        "id_suffix": "maximum_responsivity",
+        "name": "Maximum measured spectral responsivity",
+        "quantity": "maximum_spectral_responsivity",
+        "observable": "responsivity",
+        "component": "responsivity",
+        "operation": "max",
+        "unit": "A/W"
+      }
+    ]
+  }
+}
