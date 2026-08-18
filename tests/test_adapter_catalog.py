@@ -34,6 +34,7 @@ class AdapterCatalogTests(unittest.TestCase):
             self.assertTrue(capability["device_classes"])
             self.assertTrue(capability["physics_domains"])
             self.assertTrue(capability["manifest_required"])
+            self.assertTrue(capability["required_intake_fields"])
 
     def test_cli_prints_machine_readable_adapter_catalog(self) -> None:
         output = io.StringIO()

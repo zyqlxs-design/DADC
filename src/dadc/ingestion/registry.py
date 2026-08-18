@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -40,6 +41,7 @@ class AdapterCapability:
     physics_domains: tuple[str, ...]
     automation_level: str
     manifest_required: bool
+    required_intake_fields: tuple[str, ...]
     maturity: str
 
     def to_dict(self) -> dict[str, Any]:
@@ -53,6 +55,7 @@ class AdapterCapability:
             "physics_domains": list(self.physics_domains),
             "automation_level": self.automation_level,
             "manifest_required": self.manifest_required,
+            "required_intake_fields": list(self.required_intake_fields),
             "maturity": self.maturity,
         }
 
@@ -87,6 +90,12 @@ class TouchstoneRFFilterAdapter:
         physics_domains=("electromagnetics",),
         automation_level="automatic_with_manifest",
         manifest_required=True,
+        required_intake_fields=(
+            "case_id",
+            "device_name",
+            "filter_order",
+            "source_timezone",
+        ),
         maturity="validated",
     )
 
@@ -158,6 +167,13 @@ class TouchstoneAntennaAdapter:
         physics_domains=("electromagnetics",),
         automation_level="automatic_with_manifest",
         manifest_required=True,
+        required_intake_fields=(
+            "case_id",
+            "device_name",
+            "source_timezone",
+            "feed_type",
+            "radiation_mode",
+        ),
         maturity="validated",
     )
 
@@ -228,6 +244,22 @@ class TouchstoneInductorAdapter:
         physics_domains=("electromagnetics",),
         automation_level="automatic_with_manifest_and_pinned_companion",
         manifest_required=True,
+        required_intake_fields=(
+            "case_id",
+            "device_name",
+            "device_class",
+            "source_timezone",
+            "source_timestamp",
+            "manufacturer",
+            "part_number",
+            "construction",
+            "package_size",
+            "datasheet_specifications",
+            "measurement_context",
+            "literature_context",
+            "metric_reference_frequencies_hz",
+            "companion_artifacts",
+        ),
         maturity="validated",
     )
 
@@ -331,6 +363,7 @@ class JouleThermalFieldBundleAdapter:
         physics_domains=("electromagnetics", "thermal"),
         automation_level="automatic_for_self_checking_bundle",
         manifest_required=True,
+        required_intake_fields=("case_id", "device_name"),
         maturity="validated",
     )
 
@@ -392,6 +425,16 @@ class TabularExperimentCSVAdapter:
         physics_domains=("*",),
         automation_level="automatic_with_explicit_semantic_manifest",
         manifest_required=True,
+        required_intake_fields=(
+            "case_id",
+            "device_name",
+            "device_class",
+            "device_subtype",
+            "physics_domains",
+            "source_timestamp",
+            "experiment_context",
+            "tabular_contract",
+        ),
         maturity="validated_minimal",
     )
 
@@ -444,6 +487,98 @@ class AdapterRegistry:
             adapter.capability.to_dict()
             for adapter in sorted(self.adapters, key=lambda item: item.adapter_id)
         ]
+
+    @staticmethod
+    def _missing_intake_fields(
+        intake: dict[str, Any],
+        required_fields: tuple[str, ...],
+    ) -> list[str]:
+        return [
+            field
+            for field in required_fields
+            if intake.get(field) in (None, "", [], {})
+        ]
+
+    def preflight(self, source: Path, intake: dict[str, Any]) -> dict[str, Any]:
+        """Inspect routing and required metadata without mutating a warehouse."""
+
+        source_path = source.resolve()
+        if not source_path.is_file():
+            raise FileNotFoundError(f"Preflight source is not one existing file: {source_path}")
+        requested = intake.get("adapter")
+        candidates = self.adapters
+        if requested:
+            candidates = [adapter for adapter in candidates if adapter.adapter_id == requested]
+            if not candidates:
+                known = ", ".join(adapter.adapter_id for adapter in self.adapters)
+                raise ValueError(f"Unknown adapter {requested!r}; installed adapters: {known}")
+
+        scored = sorted(
+            ((adapter.probe(source_path, intake), adapter) for adapter in candidates),
+            key=lambda item: (-item[0].confidence, item[0].adapter_id),
+        )
+        rendered_candidates: list[dict[str, Any]] = []
+        for probe, adapter in scored:
+            missing = self._missing_intake_fields(
+                intake,
+                adapter.capability.required_intake_fields,
+            )
+            rendered_candidates.append(
+                {
+                    "adapter_id": adapter.adapter_id,
+                    "adapter_version": adapter.adapter_version,
+                    "confidence": probe.confidence,
+                    "reason": probe.reason,
+                    "probe_threshold_met": probe.confidence >= 0.80,
+                    "missing_intake_fields": missing,
+                }
+            )
+
+        top_probe, top_adapter = scored[0]
+        top_missing = rendered_candidates[0]["missing_intake_fields"]
+        tied = (
+            len(scored) > 1
+            and top_probe.confidence >= 0.80
+            and top_probe.confidence == scored[1][0].confidence
+        )
+        if tied:
+            decision = "ambiguous"
+            recommended_adapter = None
+            next_action = "set an explicit adapter and supply its declared intake semantics"
+        elif top_probe.confidence >= 0.80 and top_missing:
+            decision = "needs_metadata"
+            recommended_adapter = top_adapter.adapter_id
+            next_action = "supply every missing_intake_fields value before ingestion"
+        elif top_probe.confidence >= 0.80:
+            decision = "ready"
+            recommended_adapter = top_adapter.adapter_id
+            next_action = "run ingest with the same source and intake manifest"
+        elif top_probe.confidence > 0.0 and top_missing:
+            decision = "needs_metadata"
+            recommended_adapter = top_adapter.adapter_id
+            next_action = "supply every missing_intake_fields value, then run preflight again"
+        else:
+            decision = "unsupported"
+            recommended_adapter = None
+            next_action = "add a source adapter or correct the source format and explicit semantics"
+
+        digest = hashlib.sha256(source_path.read_bytes()).hexdigest()
+        return {
+            "preflight_version": "1.0",
+            "source": str(source_path),
+            "source_sha256": digest,
+            "source_size_bytes": source_path.stat().st_size,
+            "requested_adapter": requested,
+            "decision": decision,
+            "recommended_adapter": recommended_adapter,
+            "candidates": rendered_candidates,
+            "next_action": next_action,
+            "scope": "adapter routing and required top-level intake metadata",
+            "guarantees": {
+                "warehouse_mutated": False,
+                "full_case_validation_performed": False,
+            },
+        }
 
     def select(self, source: Path, intake: dict[str, Any]) -> tuple[SourceAdapter, ProbeResult]:
         requested = intake.get("adapter")

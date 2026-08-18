@@ -107,6 +107,14 @@ def main(argv: list[str] | None = None) -> int:
         help="print the machine-readable capability boundary of installed source adapters",
     )
 
+    preflight_parser = subparsers.add_parser(
+        "preflight",
+        help="inspect adapter routing and missing metadata without mutating a warehouse",
+    )
+    preflight_parser.add_argument("source")
+    preflight_parser.add_argument("--manifest", help="optional DADC intake JSON")
+    preflight_parser.add_argument("--adapter", help="limit inspection to one installed adapter")
+
     ingest_parser = subparsers.add_parser(
         "ingest",
         help="detect an adapter and append one source (or a folder of manifests) to a shared warehouse",
@@ -195,6 +203,15 @@ def main(argv: list[str] | None = None) -> int:
             }
         )
         return 0
+    if args.command == "preflight":
+        from .ingestion.registry import AdapterRegistry
+
+        rendered = AdapterRegistry().preflight(
+            Path(args.source),
+            _ingest_cli_values(args),
+        )
+        _print_json(rendered)
+        return 0 if rendered["decision"] == "ready" else 1
     if args.command == "ingest":
         from .warehouse import WarehouseManager
 
