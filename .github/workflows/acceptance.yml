@@ -1,0 +1,30 @@
+name: DADC V1.0 acceptance
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: python -m pip install -e .
+      - name: Generate binary examples
+        run: python scripts/create_examples.py examples/generated
+      - name: Run acceptance and real-ingestion tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate persisted repository
+        run: python -m dadc validate examples/generated
+      - name: Ingest and validate real HFSS Touchstone fixture
+        run: |
+          python -m dadc ingest-touchstone tests/fixtures/bandpass_filter_run_001_HFSSDesign1.s2p examples/real_hfss --case-id hfss_bandpass_real_001 --device-name "HFSS official interdigital bandpass filter" --filter-order 8 --source-timezone +08:00
+          python -m dadc validate examples/real_hfss

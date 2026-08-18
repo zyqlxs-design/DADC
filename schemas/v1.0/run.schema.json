@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/schemas/v1.0/run.schema.json",
+  "title": "DADC V1.0 Run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entity_type", "schema_version", "run_id", "study_id", "design_revision_id", "activity_type", "status", "physics_domains", "started_at", "ended_at", "input_artifact_ids", "output_artifact_ids", "provenance_id", "environment", "source_context"],
+  "properties": {
+    "entity_type": {"const": "Run"},
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string", "minLength": 3},
+    "parent_run_id": {"type": "string", "minLength": 3},
+    "study_id": {"type": "string", "minLength": 3},
+    "design_revision_id": {"type": "string", "minLength": 3},
+    "activity_type": {"enum": ["simulation_run", "experiment_run", "literature_record", "data_processing", "optimization_step"]},
+    "status": {"enum": ["planned", "running", "succeeded", "failed", "cancelled"]},
+    "physics_domains": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "started_at": {"type": "string", "format": "date-time"},
+    "ended_at": {"type": "string", "format": "date-time"},
+    "input_artifact_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "output_artifact_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "provenance_id": {"type": "string", "minLength": 3},
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "compute"],
+      "properties": {
+        "platform": {"type": "string", "minLength": 1},
+        "compute": {"type": "string", "minLength": 1},
+        "random_seed": {"type": "integer"},
+        "container_digest": {"type": "string"}
+      }
+    },
+    "source_context": {"type": "object", "minProperties": 1},
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage", "error_code", "message", "log_artifact_id", "recoverable"],
+      "properties": {
+        "stage": {"type": "string", "minLength": 1},
+        "error_code": {"type": "string", "minLength": 1},
+        "message": {"type": "string", "minLength": 1},
+        "log_artifact_id": {"type": "string", "minLength": 3},
+        "recoverable": {"type": "boolean"}
+      }
+    },
+    "migration_history": {"type": "array", "items": {"type": "object", "minProperties": 1}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "failed"}}},
+      "then": {"required": ["failure"]}
+    },
+    {
+      "if": {"properties": {"activity_type": {"const": "simulation_run"}}},
+      "then": {
+        "properties": {
+          "source_context": {
+            "required": ["solver"],
+            "properties": {
+              "solver": {
+                "type": "object",
+                "required": ["name", "version"],
+                "properties": {"name": {"type": "string"}, "version": {"type": "string"}}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"activity_type": {"const": "experiment_run"}}},
+      "then": {"properties": {"source_context": {"required": ["experiment"], "properties": {"experiment": {"type": "object", "minProperties": 1}}}}}
+    },
+    {
+      "if": {"properties": {"activity_type": {"const": "literature_record"}}},
+      "then": {"properties": {"source_context": {"required": ["literature"], "properties": {"literature": {"type": "object", "minProperties": 1}}}}}
+    },
+    {
+      "if": {"properties": {"activity_type": {"const": "data_processing"}}},
+      "then": {"properties": {"source_context": {"required": ["processing"], "properties": {"processing": {"type": "object", "minProperties": 1}}}}}
+    },
+    {
+      "if": {"properties": {"activity_type": {"const": "optimization_step"}}},
+      "then": {"properties": {"source_context": {"required": ["optimization"], "properties": {"optimization": {"type": "object", "minProperties": 1}}}}}
+    }
+  ]
+}

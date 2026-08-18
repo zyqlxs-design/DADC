@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/schemas/v1.0/device_profiles/rf_filter.schema.json",
+  "title": "RF filter device extension",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["rf_filter"],
+  "properties": {
+    "rf_filter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filter_response", "order", "port_count"],
+      "properties": {
+        "filter_response": {"enum": ["lowpass", "highpass", "bandpass", "bandstop"]},
+        "order": {"type": "integer", "minimum": 1},
+        "port_count": {"type": "integer", "minimum": 2}
+      }
+    }
+  }
+}
+

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/schemas/v1.0/device_profiles/power_resistor.schema.json",
+  "title": "Power resistor extension",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["power_resistor"],
+  "properties": {
+    "power_resistor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resistor_type", "terminal_count", "primary_function", "coupling_strategy", "field_bundle_schema_version"],
+      "properties": {
+        "resistor_type": {"enum": ["thin_film", "thick_film", "wirewound", "bulk"]},
+        "terminal_count": {"type": "integer", "minimum": 2},
+        "primary_function": {"type": "string", "minLength": 1},
+        "coupling_strategy": {"enum": ["one_way", "two_way", "co_simulation"]},
+        "field_bundle_schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"}
+      }
+    }
+  }
+}

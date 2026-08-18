@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/schemas/v1.0/validation_collection.schema.json",
+  "title": "DADC V1.0 validation.json envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "validations"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "validations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "object"}
+    }
+  }
+}
+

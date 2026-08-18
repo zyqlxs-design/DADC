@@ -1,0 +1,15 @@
+{
+  "intake_schema_version": "1.0",
+  "source": "../../tests/fixtures/bandpass_filter_run_001_HFSSDesign1.s2p",
+  "adapter": "touchstone_rf_filter",
+  "case_id": "hfss_bandpass_real_001",
+  "device_name": "HFSS official interdigital bandpass filter",
+  "device_class": "rf_filter",
+  "activity_type": "simulation_run",
+  "filter_order": 8,
+  "source_timezone": "+08:00",
+  "operator_id": "local_user",
+  "platform": "Windows 10",
+  "compute": "not_recorded",
+  "solver_edition": "Student"
+}

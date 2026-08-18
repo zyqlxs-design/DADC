@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/schemas/v1.0/device_profiles/antenna.schema.json",
+  "title": "Antenna device extension",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["antenna"],
+  "properties": {
+    "antenna": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["feed_type", "radiation_mode", "port_count"],
+      "properties": {
+        "feed_type": {"type": "string", "minLength": 1},
+        "radiation_mode": {"type": "string", "minLength": 1},
+        "port_count": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}
+

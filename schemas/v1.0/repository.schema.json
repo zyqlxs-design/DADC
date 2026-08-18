@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/schemas/v1.0/repository.schema.json",
+  "title": "DADC V1.0 Repository Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["repository_id", "schema_version", "created_at", "cases", "indexes"],
+  "properties": {
+    "repository_id": {"type": "string", "minLength": 3},
+    "schema_version": {"const": "1.0"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["case_id", "path"],
+        "properties": {
+          "case_id": {"type": "string", "minLength": 3},
+          "path": {"type": "string", "pattern": "^cases/"}
+        }
+      }
+    },
+    "indexes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "path", "format"],
+        "properties": {
+          "name": {"type": "string"},
+          "path": {"type": "string", "pattern": "\\.parquet$"},
+          "format": {"const": "parquet"}
+        }
+      }
+    }
+  }
+}
+

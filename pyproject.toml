@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dadc"
+version = "1.4.0"
+description = "DADC V1.0 heterogeneous device simulation data repository"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "DADC Engineering"}]
+dependencies = [
+  "jsonschema>=4.21,<5",
+  "numpy>=1.24,<3",
+  "h5py>=3.10,<4",
+  "pyarrow>=15,<22",
+]
+
+[project.optional-dependencies]
+aedt = ["pyaedt>=1,<2"]
+
+[project.scripts]
+dadc = "dadc.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+dadc = ["py.typed"]
+
+[tool.setuptools.data-files]
+"share/dadc/schemas/v1.0" = [
+  "schemas/v1.0/artifact.schema.json",
+  "schemas/v1.0/design_revision.schema.json",
+  "schemas/v1.0/device.schema.json",
+  "schemas/v1.0/metric.schema.json",
+  "schemas/v1.0/observable.schema.json",
+  "schemas/v1.0/provenance.schema.json",
+  "schemas/v1.0/repository.schema.json",
+  "schemas/v1.0/run.schema.json",
+  "schemas/v1.0/study.schema.json",
+  "schemas/v1.0/validation.schema.json",
+  "schemas/v1.0/validation_collection.schema.json",
+]
+"share/dadc/schemas/v1.0/device_profiles" = [
+  "schemas/v1.0/device_profiles/antenna.schema.json",
+  "schemas/v1.0/device_profiles/inductor.schema.json",
+  "schemas/v1.0/device_profiles/multiphysics_component.schema.json",
+  "schemas/v1.0/device_profiles/power_resistor.schema.json",
+  "schemas/v1.0/device_profiles/rf_filter.schema.json",
+]

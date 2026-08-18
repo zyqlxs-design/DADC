@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/schemas/v1.0/validation.schema.json",
+  "title": "DADC V1.0 Validation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entity_type", "schema_version", "validation_id", "subject_refs", "validation_type", "method", "threshold", "result", "evidence_artifact_ids", "executed_at", "provenance_id"],
+  "properties": {
+    "entity_type": {"const": "Validation"},
+    "schema_version": {"const": "1.0"},
+    "validation_id": {"type": "string", "minLength": 3},
+    "subject_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["entity_type", "entity_id"],
+        "properties": {
+          "entity_type": {"enum": ["Device", "DesignRevision", "Study", "Run", "Observable", "Metric", "Artifact", "Validation", "Provenance"]},
+          "entity_id": {"type": "string", "minLength": 3}
+        }
+      }
+    },
+    "validation_type": {"enum": ["schema_validation", "solver_convergence", "mesh_independence", "physical_rule_check", "cross_solver_comparison", "experiment_comparison", "literature_benchmark"]},
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1},
+        "script_artifact_id": {"type": "string", "minLength": 3}
+      }
+    },
+    "threshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "operator", "value", "unit"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "operator": {"enum": ["<", "<=", "==", ">=", ">", "in_range"]},
+        "value": {"type": ["number", "string", "array", "boolean"]},
+        "unit": {"type": "string", "minLength": 1}
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "summary", "measured_values"],
+      "properties": {
+        "status": {"enum": ["passed", "failed", "warning"]},
+        "summary": {"type": "string", "minLength": 1},
+        "measured_values": {"type": "array", "items": {"type": "object", "minProperties": 1}}
+      }
+    },
+    "evidence_artifact_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "executed_at": {"type": "string", "format": "date-time"},
+    "provenance_id": {"type": "string", "minLength": 3}
+  }
+}
+

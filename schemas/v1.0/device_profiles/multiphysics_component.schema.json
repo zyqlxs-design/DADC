@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/schemas/v1.0/device_profiles/multiphysics_component.schema.json",
+  "title": "Multiphysics component extension",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["multiphysics_component"],
+  "properties": {
+    "multiphysics_component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coupling_strategy", "primary_function"],
+      "properties": {
+        "coupling_strategy": {"enum": ["one_way", "two_way", "co_simulation"]},
+        "primary_function": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
+

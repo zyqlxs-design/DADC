@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/schemas/v1.0/design_revision.schema.json",
+  "title": "DADC V1.0 DesignRevision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entity_type", "schema_version", "design_revision_id", "device_id", "revision_label", "geometry", "materials", "topology", "artifact_ids", "created_at"],
+  "properties": {
+    "entity_type": {"const": "DesignRevision"},
+    "schema_version": {"const": "1.0"},
+    "design_revision_id": {"type": "string", "minLength": 3},
+    "device_id": {"type": "string", "minLength": 3},
+    "revision_label": {"type": "string", "minLength": 1},
+    "parent_revision_id": {"type": "string", "minLength": 3},
+    "change_summary": {"type": "string", "minLength": 1},
+    "geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["representation", "parameters"],
+      "properties": {
+        "representation": {"enum": ["parametric", "cad", "mesh_only", "analytical"]},
+        "coordinate_system_ref": {"type": "string", "minLength": 1},
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "value", "unit", "value_origin"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "value": {"type": ["number", "string", "boolean"]},
+              "unit": {"type": "string", "minLength": 1},
+              "value_origin": {"enum": ["calculated", "manual_entry", "literature_extracted"]}
+            }
+          }
+        }
+      }
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["material_id", "role", "properties", "source_provenance_id"],
+        "properties": {
+          "material_id": {"type": "string", "minLength": 1},
+          "role": {"type": "string", "minLength": 1},
+          "properties": {"type": "object", "minProperties": 1},
+          "source_provenance_id": {"type": "string", "minLength": 3}
+        }
+      }
+    },
+    "topology": {"type": "object", "minProperties": 1},
+    "artifact_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}
+
