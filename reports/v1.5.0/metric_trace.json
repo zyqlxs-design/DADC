@@ -1,0 +1,353 @@
+﻿{
+  "metric": {
+    "entity_type": "Metric",
+    "schema_version": "1.0",
+    "metric_id": "metric_photodiode_spectral_exp_001_maximum_responsivity",
+    "run_id": "run_photodiode_spectral_exp_001_tabular_import",
+    "name": "Maximum measured spectral responsivity",
+    "quantity": "maximum_spectral_responsivity",
+    "value": 0.55,
+    "unit": "A/W",
+    "value_origin": "calculated",
+    "source_observable_ids": [
+      "obs_photodiode_spectral_exp_001_responsivity"
+    ],
+    "extraction_method": "max over component responsivity from declared CSV columns",
+    "calculation": {
+      "operation": "max",
+      "component": "responsivity",
+      "script_artifact_id": "art_photodiode_spectral_exp_001_adapter_script"
+    },
+    "provenance_id": "prov_photodiode_spectral_exp_001_tabular_import"
+  },
+  "observables": [
+    {
+      "entity_type": "Observable",
+      "schema_version": "1.0",
+      "observable_id": "obs_photodiode_spectral_exp_001_responsivity",
+      "run_id": "run_photodiode_spectral_exp_001_experiment",
+      "observable_type": "response",
+      "quantity": "spectral_responsivity",
+      "axes": [
+        {
+          "name": "wavelength",
+          "unit": "nm",
+          "data_ref": "cases/photodiode_spectral_exp_001/data/results.h5:/axes/wavelength"
+        }
+      ],
+      "components": [
+        "responsivity"
+      ],
+      "complex_representation": "not_applicable",
+      "data_ref": "cases/photodiode_spectral_exp_001/data/results.h5:/observables/responsivity",
+      "artifact_id": "art_photodiode_spectral_exp_001_results_h5",
+      "coordinate_system_ref": null,
+      "value_origin": "raw_experiment_output",
+      "provenance_id": "prov_photodiode_spectral_exp_001_experiment"
+    }
+  ],
+  "runs": [
+    {
+      "entity_type": "Run",
+      "schema_version": "1.0",
+      "run_id": "run_photodiode_spectral_exp_001_tabular_import",
+      "study_id": "study_photodiode_spectral_exp_001_measurement",
+      "design_revision_id": "rev_photodiode_spectral_exp_001_001",
+      "activity_type": "data_processing",
+      "status": "succeeded",
+      "physics_domains": [
+        "optical",
+        "electromagnetics"
+      ],
+      "started_at": "2026-08-18T15:05:00Z",
+      "ended_at": "2026-08-18T15:05:00Z",
+      "input_artifact_ids": [
+        "art_photodiode_spectral_exp_001_measurement_csv",
+        "art_photodiode_spectral_exp_001_adapter_script",
+        "art_photodiode_spectral_exp_001_intake_snapshot"
+      ],
+      "output_artifact_ids": [
+        "art_photodiode_spectral_exp_001_results_h5",
+        "art_photodiode_spectral_exp_001_tabular_checks"
+      ],
+      "provenance_id": "prov_photodiode_spectral_exp_001_tabular_import",
+      "environment": {
+        "platform": "optical_bench",
+        "compute": "local_cpu"
+      },
+      "source_context": {
+        "processing": {
+          "adapter": "tabular_experiment_csv",
+          "adapter_version": "1.0.0",
+          "normalization": "declared numeric CSV columns copied to HDF5 without unit conversion"
+        }
+      }
+    },
+    {
+      "entity_type": "Run",
+      "schema_version": "1.0",
+      "run_id": "run_photodiode_spectral_exp_001_experiment",
+      "study_id": "study_photodiode_spectral_exp_001_measurement",
+      "design_revision_id": "rev_photodiode_spectral_exp_001_001",
+      "activity_type": "experiment_run",
+      "status": "succeeded",
+      "physics_domains": [
+        "optical",
+        "electromagnetics"
+      ],
+      "started_at": "2026-08-18T15:00:00+08:00",
+      "ended_at": "2026-08-18T15:00:00+08:00",
+      "input_artifact_ids": [
+        "art_photodiode_spectral_exp_001_intake_snapshot"
+      ],
+      "output_artifact_ids": [
+        "art_photodiode_spectral_exp_001_measurement_csv"
+      ],
+      "provenance_id": "prov_photodiode_spectral_exp_001_experiment",
+      "environment": {
+        "platform": "optical_bench",
+        "compute": "local_cpu"
+      },
+      "source_context": {
+        "experiment": {
+          "instrument": "DADC fixture monochromator and source meter",
+          "instrument_version": "1.0",
+          "calibration": "fixture wavelength calibration certificate OPT-001",
+          "incident_optical_power_W": 0.001,
+          "ambient_temperature_K": 298.15
+        }
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "entity_type": "Artifact",
+      "schema_version": "1.0",
+      "artifact_id": "art_photodiode_spectral_exp_001_results_h5",
+      "subject_refs": [
+        {
+          "entity_type": "Run",
+          "entity_id": "run_photodiode_spectral_exp_001_tabular_import"
+        },
+        {
+          "entity_type": "Observable",
+          "entity_id": "obs_photodiode_spectral_exp_001_responsivity"
+        },
+        {
+          "entity_type": "Observable",
+          "entity_id": "obs_photodiode_spectral_exp_001_photocurrent"
+        }
+      ],
+      "artifact_role": "result_hdf5",
+      "relative_path": "cases/photodiode_spectral_exp_001/data/results.h5",
+      "sha256": "e67fd3e4c41f8182d59f3e6b4ad214376a7e1ee7370d109343f9df716215f917",
+      "size_bytes": 16144,
+      "media_type": "application/x-hdf5",
+      "immutable": true,
+      "value_origin": "calculated",
+      "provenance_id": "prov_photodiode_spectral_exp_001_tabular_import",
+      "created_at": "2026-08-18T15:05:00Z"
+    },
+    {
+      "entity_type": "Artifact",
+      "schema_version": "1.0",
+      "artifact_id": "art_photodiode_spectral_exp_001_measurement_csv",
+      "subject_refs": [
+        {
+          "entity_type": "Run",
+          "entity_id": "run_photodiode_spectral_exp_001_experiment"
+        },
+        {
+          "entity_type": "Run",
+          "entity_id": "run_photodiode_spectral_exp_001_tabular_import"
+        },
+        {
+          "entity_type": "DesignRevision",
+          "entity_id": "rev_photodiode_spectral_exp_001_001"
+        }
+      ],
+      "artifact_role": "measurement_data",
+      "relative_path": "cases/photodiode_spectral_exp_001/raw/photodiode_spectral_experiment.csv",
+      "sha256": "cb3f4984e4c04c5579fabd4e903b80c9d5b1385154628819eedc6facd9199fb7",
+      "size_bytes": 159,
+      "media_type": "text/csv",
+      "immutable": true,
+      "value_origin": "raw_experiment_output",
+      "provenance_id": "prov_photodiode_spectral_exp_001_experiment",
+      "created_at": "2026-08-18T15:00:00+08:00"
+    },
+    {
+      "entity_type": "Artifact",
+      "schema_version": "1.0",
+      "artifact_id": "art_photodiode_spectral_exp_001_adapter_script",
+      "subject_refs": [
+        {
+          "entity_type": "Run",
+          "entity_id": "run_photodiode_spectral_exp_001_tabular_import"
+        }
+      ],
+      "artifact_role": "script",
+      "relative_path": "cases/photodiode_spectral_exp_001/scripts/tabular_adapter.py",
+      "sha256": "e515b6a0d99f04bcf8501ec3aa57d5d5e856383dbf9b3ca0df1f8304a13d3a46",
+      "size_bytes": 33915,
+      "media_type": "text/x-python",
+      "immutable": true,
+      "value_origin": "manual_entry",
+      "provenance_id": "prov_photodiode_spectral_exp_001_tabular_import",
+      "created_at": "2026-08-18T15:05:00Z"
+    },
+    {
+      "entity_type": "Artifact",
+      "schema_version": "1.0",
+      "artifact_id": "art_photodiode_spectral_exp_001_intake_snapshot",
+      "subject_refs": [
+        {
+          "entity_type": "DesignRevision",
+          "entity_id": "rev_photodiode_spectral_exp_001_001"
+        },
+        {
+          "entity_type": "Run",
+          "entity_id": "run_photodiode_spectral_exp_001_tabular_import"
+        }
+      ],
+      "artifact_role": "report",
+      "relative_path": "cases/photodiode_spectral_exp_001/evidence/intake_snapshot.json",
+      "sha256": "89615cf2c63e82af147521a8fa9e5bf64eee8bd74662231123e115e09a480838",
+      "size_bytes": 2383,
+      "media_type": "application/json",
+      "immutable": true,
+      "value_origin": "manual_entry",
+      "provenance_id": "prov_photodiode_spectral_exp_001_tabular_import",
+      "created_at": "2026-08-18T15:05:00Z"
+    },
+    {
+      "entity_type": "Artifact",
+      "schema_version": "1.0",
+      "artifact_id": "art_photodiode_spectral_exp_001_tabular_checks",
+      "subject_refs": [
+        {
+          "entity_type": "Validation",
+          "entity_id": "val_photodiode_spectral_exp_001_schema"
+        },
+        {
+          "entity_type": "Validation",
+          "entity_id": "val_photodiode_spectral_exp_001_tabular_integrity"
+        }
+      ],
+      "artifact_role": "validation_evidence",
+      "relative_path": "cases/photodiode_spectral_exp_001/evidence/tabular_checks.json",
+      "sha256": "6f4cd3d36e2eaa63ff60747805cd8455ddf27d1c4621d515ea7ba451b4ac39df",
+      "size_bytes": 644,
+      "media_type": "application/json",
+      "immutable": true,
+      "value_origin": "calculated",
+      "provenance_id": "prov_photodiode_spectral_exp_001_tabular_import",
+      "created_at": "2026-08-18T15:05:00Z"
+    }
+  ],
+  "provenance": [
+    {
+      "entity_type": "Provenance",
+      "schema_version": "1.0",
+      "provenance_id": "prov_photodiode_spectral_exp_001_tabular_import",
+      "subject_refs": [
+        {
+          "entity_type": "Run",
+          "entity_id": "run_photodiode_spectral_exp_001_tabular_import"
+        },
+        {
+          "entity_type": "Artifact",
+          "entity_id": "art_photodiode_spectral_exp_001_results_h5"
+        },
+        {
+          "entity_type": "Artifact",
+          "entity_id": "art_photodiode_spectral_exp_001_adapter_script"
+        },
+        {
+          "entity_type": "Artifact",
+          "entity_id": "art_photodiode_spectral_exp_001_intake_snapshot"
+        },
+        {
+          "entity_type": "Artifact",
+          "entity_id": "art_photodiode_spectral_exp_001_tabular_checks"
+        },
+        {
+          "entity_type": "Metric",
+          "entity_id": "metric_photodiode_spectral_exp_001_maximum_responsivity"
+        }
+      ],
+      "source_type": "data_processing",
+      "sources": [
+        {
+          "source_id": "cb3f4984e4c04c5579fabd4e903b80c9d5b1385154628819eedc6facd9199fb7",
+          "source_type": "file",
+          "title": "photodiode_spectral_experiment.csv"
+        }
+      ],
+      "software": [
+        {
+          "name": "DADC Tabular Experiment Adapter",
+          "version": "1.0.0",
+          "role": "deterministic CSV normalization and metric extraction"
+        }
+      ],
+      "scripts": [
+        "art_photodiode_spectral_exp_001_adapter_script"
+      ],
+      "people": [
+        {
+          "person_id": "fixture_operator",
+          "role": "data importer"
+        }
+      ],
+      "generated_at": "2026-08-18T15:05:00Z"
+    },
+    {
+      "entity_type": "Provenance",
+      "schema_version": "1.0",
+      "provenance_id": "prov_photodiode_spectral_exp_001_experiment",
+      "subject_refs": [
+        {
+          "entity_type": "Run",
+          "entity_id": "run_photodiode_spectral_exp_001_experiment"
+        },
+        {
+          "entity_type": "Artifact",
+          "entity_id": "art_photodiode_spectral_exp_001_measurement_csv"
+        },
+        {
+          "entity_type": "Observable",
+          "entity_id": "obs_photodiode_spectral_exp_001_responsivity"
+        },
+        {
+          "entity_type": "Observable",
+          "entity_id": "obs_photodiode_spectral_exp_001_photocurrent"
+        }
+      ],
+      "source_type": "experiment",
+      "sources": [
+        {
+          "source_id": "cb3f4984e4c04c5579fabd4e903b80c9d5b1385154628819eedc6facd9199fb7",
+          "source_type": "file",
+          "title": "photodiode_spectral_experiment.csv"
+        }
+      ],
+      "software": [
+        {
+          "name": "DADC fixture monochromator and source meter",
+          "version": "1.0",
+          "role": "measurement acquisition"
+        }
+      ],
+      "scripts": [],
+      "people": [
+        {
+          "person_id": "fixture_operator",
+          "role": "experiment operator"
+        }
+      ],
+      "generated_at": "2026-08-18T15:00:00+08:00"
+    }
+  ],
+  "coupling_edges": []
+}
