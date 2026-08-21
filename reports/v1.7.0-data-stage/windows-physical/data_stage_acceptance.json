@@ -1,0 +1,318 @@
+{
+  "data_stage_acceptance_version": "1.0",
+  "executed_at": "2026-08-21T06:52:53Z",
+  "status": "passed",
+  "evaluation_policy": "objective pass/fail checks only; no subjective score",
+  "checks": [
+    {
+      "check_id": "frozen_core_entity_schemas_present",
+      "status": "passed",
+      "evidence": {
+        "expected": [
+          "artifact.schema.json",
+          "design_revision.schema.json",
+          "device.schema.json",
+          "metric.schema.json",
+          "observable.schema.json",
+          "provenance.schema.json",
+          "run.schema.json",
+          "study.schema.json",
+          "validation.schema.json"
+        ],
+        "found": [
+          "artifact.schema.json",
+          "design_revision.schema.json",
+          "device.schema.json",
+          "metric.schema.json",
+          "observable.schema.json",
+          "provenance.schema.json",
+          "run.schema.json",
+          "study.schema.json",
+          "validation.schema.json"
+        ]
+      }
+    },
+    {
+      "check_id": "device_profiles_present",
+      "status": "passed",
+      "evidence": {
+        "required": [
+          "antenna.schema.json",
+          "generic_component.schema.json",
+          "inductor.schema.json",
+          "multiphysics_component.schema.json",
+          "power_resistor.schema.json",
+          "rf_filter.schema.json"
+        ],
+        "found": [
+          "antenna.schema.json",
+          "generic_component.schema.json",
+          "inductor.schema.json",
+          "multiphysics_component.schema.json",
+          "power_resistor.schema.json",
+          "rf_filter.schema.json"
+        ]
+      }
+    },
+    {
+      "check_id": "knowledge_manifest_v11_and_content_counts",
+      "status": "passed",
+      "evidence": {
+        "manifest_version": "1.1",
+        "documents": 4,
+        "chunks": 13
+      }
+    },
+    {
+      "check_id": "knowledge_raw_artifact_integrity",
+      "status": "passed",
+      "evidence": {
+        "checked_documents": 4,
+        "failures": []
+      }
+    },
+    {
+      "check_id": "knowledge_index_rebuildable",
+      "status": "passed",
+      "evidence": {
+        "record_count": 13,
+        "dimensions": 128,
+        "authoritative": false,
+        "byte_identical_rebuild": true
+      }
+    },
+    {
+      "check_id": "shared_plus_device_partition_retrieval",
+      "status": "passed",
+      "evidence": {
+        "antenna_sources": [
+          "antenna_workflow_fixture",
+          "pyaedt_shared_api_fixture"
+        ],
+        "rf_filter_sources": [
+          "pyaedt_shared_api_fixture",
+          "rf_filter_workflow_fixture"
+        ],
+        "inductor_sources": [
+          "inductor_workflow_fixture",
+          "pyaedt_shared_api_fixture"
+        ]
+      }
+    },
+    {
+      "check_id": "optimization_bundle_ingested",
+      "status": "passed",
+      "evidence": {
+        "status": "ingested",
+        "source": "D:\\DADC_TEST\\data_acceptance_physical_20260821_145246\\optimization_fixture\\optimization_bundle.json",
+        "source_sha256": "b18dbcd79a2aa164b306f1553b24d8d80cd1967b1a3555f4378e0e6ea634734c",
+        "warehouse": "D:\\DADC_TEST\\data_acceptance_physical_20260821_145246\\data_root\\warehouse",
+        "case_id": "mvp_optimization_001",
+        "adapter_id": "optimization_trace_bundle",
+        "adapter_version": "1.0.0",
+        "duplicate_of_case_id": null,
+        "quarantine_path": null,
+        "message": "Case committed; raw source preserved and global indexes rebuilt.",
+        "validation": {
+          "repository": "D:\\DADC_TEST\\data_acceptance_physical_20260821_145246\\data_root\\warehouse",
+          "valid": true,
+          "checked_records": 57,
+          "checked_artifacts": 16,
+          "checked_data_refs": 11,
+          "issues": []
+        }
+      }
+    },
+    {
+      "check_id": "warehouse_schema_and_integrity_validation",
+      "status": "passed",
+      "evidence": {
+        "repository": "D:\\DADC_TEST\\data_acceptance_physical_20260821_145246\\data_root\\warehouse",
+        "valid": true,
+        "checked_records": 57,
+        "checked_artifacts": 16,
+        "checked_data_refs": 11,
+        "issues": []
+      }
+    },
+    {
+      "check_id": "failed_and_verified_runs_preserved",
+      "status": "passed",
+      "evidence": {
+        "run_count": 7,
+        "failed_run_count": 1,
+        "succeeded_run_count": 6
+      }
+    },
+    {
+      "check_id": "verified_metric_trace_reaches_artifacts_and_provenance",
+      "status": "passed",
+      "evidence": {
+        "metric_id": "metric_mvp_optimization_001_verified_objective",
+        "artifact_count": 16,
+        "provenance_count": 7
+      }
+    },
+    {
+      "check_id": "required_ingestion_adapters_registered",
+      "status": "passed",
+      "evidence": {
+        "required": [
+          "joule_thermal_field_bundle",
+          "optimization_trace_bundle",
+          "tabular_experiment_csv",
+          "touchstone_antenna",
+          "touchstone_inductor",
+          "touchstone_rf_filter"
+        ],
+        "registered": [
+          "joule_thermal_field_bundle",
+          "optimization_trace_bundle",
+          "tabular_experiment_csv",
+          "touchstone_antenna",
+          "touchstone_inductor",
+          "touchstone_rf_filter"
+        ]
+      }
+    },
+    {
+      "check_id": "physical_backend_declared",
+      "status": "passed",
+      "evidence": {
+        "backend": {
+          "backend_id": "pyaedt_patch",
+          "backend_version": "1.0.0",
+          "is_physical_solver": true,
+          "evidence_level": "local_aedt_solver_with_touchstone_and_native_project"
+        }
+      }
+    },
+    {
+      "check_id": "physical_trials_completed",
+      "status": "passed",
+      "evidence": {
+        "search_trials": 2,
+        "verification_trials": 1,
+        "statuses": {
+          "search_001": "succeeded",
+          "search_002": "succeeded",
+          "verify_001": "succeeded"
+        }
+      }
+    },
+    {
+      "check_id": "physical_artifact_integrity",
+      "status": "passed",
+      "evidence": {
+        "artifact_count": 27,
+        "failures": []
+      }
+    },
+    {
+      "check_id": "physical_native_and_touchstone_evidence",
+      "status": "passed",
+      "evidence": {
+        "artifact_roles": [
+          "native_project",
+          "raw_input",
+          "report",
+          "solver_log",
+          "validation_evidence"
+        ],
+        "media_types": [
+          "application/json",
+          "application/octet-stream",
+          "application/vnd.touchstone",
+          "text/plain"
+        ]
+      }
+    },
+    {
+      "check_id": "physical_warehouse_validation",
+      "status": "passed",
+      "evidence": {
+        "repository": "D:\\DADC_TEST\\real_data_pyaedt_patch_smoke_20260821_113206\\warehouse",
+        "valid": true,
+        "checked_records": 60,
+        "checked_artifacts": 31,
+        "checked_data_refs": 13,
+        "issues": []
+      }
+    },
+    {
+      "check_id": "physical_verified_metric_trace",
+      "status": "passed",
+      "evidence": {
+        "metric_id": "metric_pyaedt_patch_smoke_20260821_113206_verified_objective",
+        "artifact_count": 31,
+        "provenance_count": 4
+      }
+    }
+  ],
+  "not_executed": [],
+  "physical_optimization_summary": {
+    "bundle": "D:\\DADC_TEST\\pyaedt_patch_smoke_20260821_113206\\optimization_bundle.json",
+    "case_id": "pyaedt_patch_smoke_20260821_113206",
+    "best_search_trial_id": "search_002",
+    "search_metrics": {
+      "search_001": {
+        "name": "10 GHz resonance error",
+        "quantity": "target_frequency_error_hz",
+        "value": 110000000.0,
+        "unit": "Hz"
+      },
+      "search_002": {
+        "name": "10 GHz resonance error",
+        "quantity": "target_frequency_error_hz",
+        "value": 20000000.0,
+        "unit": "Hz"
+      }
+    },
+    "verification_metrics": {
+      "verify_001": {
+        "name": "10 GHz resonance error",
+        "quantity": "target_frequency_error_hz",
+        "value": 20000000.0,
+        "unit": "Hz"
+      }
+    }
+  },
+  "remaining_work": [
+    {
+      "work_id": "official_content_expansion",
+      "stage": "knowledge_content",
+      "description": "Extend the 13-source official seed corpus with material assignment, detailed convergence, postprocessing APIs, troubleshooting, and additional device examples."
+    },
+    {
+      "work_id": "additional_document_formats",
+      "stage": "knowledge_content",
+      "description": "Add PDF, Markdown, plain-text, and source-code parsers with the same raw-byte evidence policy."
+    },
+    {
+      "work_id": "bilingual_hybrid_retrieval",
+      "stage": "knowledge_retrieval",
+      "description": "Add Chinese-English semantic embeddings, lexical retrieval, metadata filters, and deterministic evaluation cases."
+    },
+    {
+      "work_id": "verified_knowledge_cards",
+      "stage": "data_to_knowledge",
+      "description": "Generate bounded knowledge cards only from DADC metrics whose validation and provenance checks pass."
+    },
+    {
+      "work_id": "data_communication_agent",
+      "stage": "agent",
+      "description": "Connect DADC queries and knowledge retrieval to a typed planner; do not allow arbitrary solver code execution."
+    },
+    {
+      "work_id": "surrogate_and_bayesian_tuning",
+      "stage": "optimization",
+      "description": "Add a surrogate model and acquisition policy, retaining full-solver verification of selected candidates."
+    },
+    {
+      "work_id": "numerical_and_experimental_validation",
+      "stage": "scientific_validation",
+      "description": "Add mesh independence, cross-solver checks, and experimental comparison where available."
+    }
+  ],
+  "architecture_decision": "Use one knowledge platform with a shared scope and device-scoped partitions. Shared PyAEDT/HFSS knowledge is reused; antenna, RF-filter, inductor, and future device knowledge is selected by metadata rather than copied into isolated databases."
+}
