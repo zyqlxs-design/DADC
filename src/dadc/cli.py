@@ -168,6 +168,9 @@ def main(argv: list[str] | None = None) -> int:
     search_parser.add_argument("corpus")
     search_parser.add_argument("query")
     search_parser.add_argument("--top-k", type=int, default=5)
+    search_parser.add_argument("--device-class")
+    search_parser.add_argument("--knowledge-type")
+    search_parser.add_argument("--topic")
 
     optimize_parser = subparsers.add_parser(
         "optimize",
@@ -286,7 +289,19 @@ def main(argv: list[str] | None = None) -> int:
         _print_json(
             {
                 "query": args.query,
-                "results": search_index(args.corpus, args.query, top_k=args.top_k),
+                "filters": {
+                    "device_class": args.device_class,
+                    "knowledge_type": args.knowledge_type,
+                    "topic": args.topic,
+                },
+                "results": search_index(
+                    args.corpus,
+                    args.query,
+                    top_k=args.top_k,
+                    device_class=args.device_class,
+                    knowledge_type=args.knowledge_type,
+                    topic=args.topic,
+                ),
             }
         )
         return 0

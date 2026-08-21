@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dadc"
-version = "1.6.0.dev0"
+version = "1.7.0.dev0"
 description = "DADC V1.0 heterogeneous device simulation data repository"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -35,6 +35,9 @@ dadc = ["py.typed"]
   "contracts/v1.0/optimization_bundle.schema.json",
   "contracts/v1.0/optimization_plan.schema.json",
   "contracts/v1.0/simulation_job.schema.json",
+]
+"share/dadc/contracts/v1.1" = [
+  "contracts/v1.1/knowledge_source_manifest.schema.json",
 ]
 "share/dadc/schemas/v1.0" = [
   "schemas/v1.0/artifact.schema.json",

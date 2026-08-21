@@ -1,6 +1,6 @@
 # DADC V1.0 数据仓库
 
-DADC V1.0 是一个可运行的异构器件工程数据仓库参考实现。它以九个冻结的一级实体为核心：`Device`、`DesignRevision`、`Study`、`Run`、`Observable`、`Metric`、`Artifact`、`Validation`、`Provenance`。天线、射频滤波器、电感和多物理场算例共享同一套核心 Schema；器件特有字段只进入独立的 profile 扩展，不进入全局横表。当前工具版本为 1.6.0.dev0，数据 Schema 仍固定为 1.0。
+DADC V1.0 是一个可运行的异构器件工程数据仓库参考实现。它以九个冻结的一级实体为核心：`Device`、`DesignRevision`、`Study`、`Run`、`Observable`、`Metric`、`Artifact`、`Validation`、`Provenance`。天线、射频滤波器、电感和多物理场算例共享同一套核心 Schema；器件特有字段只进入独立的 profile 扩展，不进入全局横表。当前工具版本为 1.7.0.dev0，数据 Schema 仍固定为 1.0。
 
 ## 快速运行
 
@@ -61,6 +61,8 @@ dadc optimize OPTIMIZATION_PLAN OUTPUT_DIR
 ## 文档知识、受控调用与自动调优最小闭环
 
 工具 1.6.0.dev0 新增独立于九对象事实库的可复现文档 corpus、可重建搜索投影、类型化仿真后端、预算化网格搜索、最优点独立复核，以及 `optimization_trace_bundle` 入库适配器。离线验收明确使用非物理解析夹具；真实后端只在 Windows + AEDT/PyAEDT 环境调用仓库固定的贴片天线脚本，不执行 LLM 生成的任意代码。架构边界、PowerShell 命令和真实运行前置条件见 [`docs/minimal-extensible-agent-loop.md`](docs/minimal-extensible-agent-loop.md)。
+
+工具 1.7.0.dev0 增加知识来源契约 V1.1、共享知识与器件分区元数据、按器件/知识类型/主题过滤的检索，以及不使用主观评分的数据阶段验收报告。不同器件共用一个知识平台：PyAEDT/HFSS 通用知识标记为 `shared`，天线、射频滤波器和电感知识按 `device_classes` 隔离。官方种子清单包含 13 个已确认的 PyAEDT/HFSS API 与案例页面。设计与验收命令见 [`docs/data-and-knowledge-stage.md`](docs/data-and-knowledge-stage.md)。
 
 ## 导入真实 HFSS Touchstone 数据
 

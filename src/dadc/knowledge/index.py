@@ -85,7 +85,15 @@ def build_index(corpus: str | Path, *, dimensions: int = 512) -> dict[str, Any]:
     return {**metadata, "index": str(index_root)}
 
 
-def search_index(corpus: str | Path, query: str, *, top_k: int = 5) -> list[dict[str, Any]]:
+def search_index(
+    corpus: str | Path,
+    query: str,
+    *,
+    top_k: int = 5,
+    device_class: str | None = None,
+    knowledge_type: str | None = None,
+    topic: str | None = None,
+) -> list[dict[str, Any]]:
     """Search the rebuildable projection and return source-addressable evidence."""
 
     if not query.strip():
@@ -104,7 +112,17 @@ def search_index(corpus: str | Path, query: str, *, top_k: int = 5) -> list[dict
         raise ValueError("Index record/vector count mismatch")
     query_vector = _vector(query, int(metadata["dimensions"]))
     scores = embeddings @ query_vector
-    ranked = sorted(range(len(records)), key=lambda index: (-float(scores[index]), index))
+    eligible: list[int] = []
+    for index, record in enumerate(records):
+        device_classes = set(record.get("device_classes", ["shared"]))
+        if device_class and device_class not in device_classes and "shared" not in device_classes:
+            continue
+        if knowledge_type and record.get("knowledge_type") != knowledge_type:
+            continue
+        if topic and topic not in set(record.get("topics", [])):
+            continue
+        eligible.append(index)
+    ranked = sorted(eligible, key=lambda index: (-float(scores[index]), index))
     results: list[dict[str, Any]] = []
     for index in ranked[: min(top_k, len(records))]:
         record = records[index]
@@ -115,6 +133,12 @@ def search_index(corpus: str | Path, query: str, *, top_k: int = 5) -> list[dict
                 "heading": record["heading"],
                 "section_type": record["section_type"],
                 "text": record["text"],
+                "knowledge_type": record.get("knowledge_type", "unclassified"),
+                "device_classes": record.get("device_classes", ["shared"]),
+                "topics": record.get("topics", ["unclassified"]),
+                "language": record.get("language", "not_recorded"),
+                "authority": record.get("authority", "not_recorded"),
+                "validation_status": record.get("validation_status", "not_recorded"),
                 "evidence": {
                     "source_id": record["source_id"],
                     "source_url": record["source_url"],

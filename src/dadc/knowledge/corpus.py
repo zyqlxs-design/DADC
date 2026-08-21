@@ -16,6 +16,8 @@ from ..contracts import validate_contract
 
 COLLECTOR_VERSION = "1.0.0"
 _SPACE = re.compile(r"[ \t\f\v]+")
+_SUPPORTED_MANIFEST_VERSIONS = {"1.0", "1.1"}
+_LOCAL_SOURCE_TYPES = {"local_fixture", "lab_document", "validated_finding"}
 
 
 def _canonical_json(value: Any) -> bytes:
@@ -163,6 +165,17 @@ def _fetch_document(
     max_bytes: int,
 ) -> tuple[bytes, str, str]:
     raw_url = str(source["url"])
+    local_path = Path(raw_url)
+    if local_path.is_absolute():
+        if source["source_type"] not in _LOCAL_SOURCE_TYPES:
+            raise ValueError(
+                "Local paths require source_type=local_fixture, lab_document, or validated_finding"
+            )
+        value = local_path.read_bytes()
+        if len(value) > max_bytes:
+            raise ValueError(f"Document exceeds max_bytes_per_document={max_bytes}: {local_path}")
+        return value, local_path.resolve().as_uri(), "text/html"
+
     parsed = urllib.parse.urlparse(raw_url)
     if parsed.scheme in ("http", "https"):
         if not allowed_hosts or parsed.hostname not in allowed_hosts:
@@ -183,8 +196,10 @@ def _fetch_document(
         return value, final_url, content_type
     if parsed.scheme not in ("", "file"):
         raise ValueError(f"Unsupported source URL scheme: {parsed.scheme!r}")
-    if source["source_type"] != "local_fixture":
-        raise ValueError("Local paths are accepted only for source_type=local_fixture")
+    if source["source_type"] not in _LOCAL_SOURCE_TYPES:
+        raise ValueError(
+            "Local paths require source_type=local_fixture, lab_document, or validated_finding"
+        )
     candidate = Path(urllib.request.url2pathname(parsed.path)) if parsed.scheme else Path(raw_url)
     if not candidate.is_absolute():
         candidate = (manifest_path.parent / candidate).resolve()
@@ -220,7 +235,17 @@ def collect_corpus(manifest: str | Path, target: str | Path) -> dict[str, Any]:
 
     manifest_path = Path(manifest).resolve()
     source_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    validate_contract(source_manifest, "knowledge_source_manifest")
+    manifest_version = str(source_manifest.get("knowledge_manifest_version", ""))
+    if manifest_version not in _SUPPORTED_MANIFEST_VERSIONS:
+        raise ValueError(
+            "knowledge_manifest_version must be one of "
+            f"{sorted(_SUPPORTED_MANIFEST_VERSIONS)}"
+        )
+    validate_contract(
+        source_manifest,
+        "knowledge_source_manifest",
+        version=manifest_version,
+    )
     root = Path(target).resolve()
     if root.exists() and (root.is_file() or any(root.iterdir())):
         raise FileExistsError(f"Refusing to overwrite non-empty corpus: {root}")
@@ -253,6 +278,35 @@ def collect_corpus(manifest: str | Path, target: str | Path) -> dict[str, Any]:
         if not sections:
             raise ValueError(f"No extractable documentation sections: {final_url}")
         document_id = f"doc_{_sha256_bytes(final_url.encode('utf-8'))[:20]}"
+        if manifest_version == "1.1":
+            knowledge_metadata = {
+                "knowledge_type": source["knowledge_type"],
+                "device_classes": list(source["device_classes"]),
+                "topics": list(source["topics"]),
+                "language": source["language"],
+                "authority": source["authority"],
+                "validation_status": source["validation_status"],
+                "evidence_refs": list(source.get("evidence_refs", [])),
+            }
+        else:
+            source_type = source["source_type"]
+            knowledge_metadata = {
+                "knowledge_type": (
+                    "official_example"
+                    if source_type == "official_example"
+                    else "api_reference"
+                    if source_type == "official_documentation"
+                    else "test_fixture"
+                ),
+                "device_classes": ["shared"],
+                "topics": ["unclassified"],
+                "language": "en",
+                "authority": "test_fixture" if source_type == "local_fixture" else "official",
+                "validation_status": (
+                    "test_only" if source_type == "local_fixture" else "source_verified"
+                ),
+                "evidence_refs": [],
+            }
         rendered_sections = [
             {
                 "heading": section.heading,
@@ -271,6 +325,7 @@ def collect_corpus(manifest: str | Path, target: str | Path) -> dict[str, Any]:
             "product": source["product"],
             "product_version": source["product_version"],
             "license": source["license"],
+            **knowledge_metadata,
             "retrieved_at": source_manifest["retrieved_at"],
             "title": parser.title or source["source_id"],
             "raw_artifact": {
@@ -296,6 +351,7 @@ def collect_corpus(manifest: str | Path, target: str | Path) -> dict[str, Any]:
                         "source_url": final_url,
                         "product": source["product"],
                         "product_version": source["product_version"],
+                        **knowledge_metadata,
                         "heading": section.heading,
                         "section_type": section.section_type,
                         "locator": locator,
@@ -318,6 +374,7 @@ def collect_corpus(manifest: str | Path, target: str | Path) -> dict[str, Any]:
     )
     corpus = {
         "corpus_version": "1.0",
+        "knowledge_manifest_version": manifest_version,
         "corpus_id": source_manifest["corpus_id"],
         "created_at": source_manifest["retrieved_at"],
         "collector": {"name": "DADC Knowledge Collector", "version": COLLECTOR_VERSION},

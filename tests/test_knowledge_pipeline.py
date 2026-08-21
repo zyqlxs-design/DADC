@@ -80,6 +80,51 @@ class KnowledgePipelineTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "rebuild"):
             search_index(self.corpus, "create setup")
 
+    def test_v11_shared_and_device_scoped_knowledge_are_filtered_without_duplication(self) -> None:
+        manifest = REPOSITORY_ROOT / "examples" / "knowledge" / "device_partition_fixture_sources.json"
+        corpus = self.root / "device_partition_corpus"
+        result = collect_corpus(manifest, corpus)
+        self.assertEqual("1.1", result["knowledge_manifest_version"])
+        self.assertEqual(4, result["document_count"])
+        build_index(corpus, dimensions=128)
+
+        antenna = search_index(
+            corpus,
+            "patch geometry probe excitation frequency sweep",
+            top_k=20,
+            device_class="antenna",
+        )
+        antenna_sources = {item["evidence"]["source_id"] for item in antenna}
+        self.assertIn("pyaedt_shared_api_fixture", antenna_sources)
+        self.assertIn("antenna_workflow_fixture", antenna_sources)
+        self.assertNotIn("rf_filter_workflow_fixture", antenna_sources)
+        self.assertNotIn("inductor_workflow_fixture", antenna_sources)
+
+        rf_filter = search_index(
+            corpus,
+            "two port passband Touchstone",
+            top_k=20,
+            device_class="rf_filter",
+        )
+        rf_sources = {item["evidence"]["source_id"] for item in rf_filter}
+        self.assertIn("pyaedt_shared_api_fixture", rf_sources)
+        self.assertIn("rf_filter_workflow_fixture", rf_sources)
+        self.assertNotIn("antenna_workflow_fixture", rf_sources)
+        self.assertNotIn("inductor_workflow_fixture", rf_sources)
+
+        inductor = search_index(
+            corpus,
+            "inductance quality factor self resonance",
+            top_k=20,
+            device_class="inductor",
+            topic="quality_factor",
+        )
+        self.assertEqual(
+            {"inductor_workflow_fixture"},
+            {item["evidence"]["source_id"] for item in inductor},
+        )
+        self.assertTrue(all(item["validation_status"] == "test_only" for item in inductor))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
