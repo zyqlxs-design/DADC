@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/contracts/v1.1/knowledge_source_manifest.schema.json",
+  "title": "DADC controlled knowledge source manifest V1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "knowledge_manifest_version",
+    "corpus_id",
+    "retrieved_at",
+    "documents"
+  ],
+  "properties": {
+    "knowledge_manifest_version": {"const": "1.1"},
+    "corpus_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$"},
+    "description": {"type": "string", "minLength": 1},
+    "retrieved_at": {"type": "string", "format": "date-time"},
+    "allowed_hosts": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "request_timeout_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 120
+    },
+    "max_bytes_per_document": {
+      "type": "integer",
+      "minimum": 1024,
+      "maximum": 20000000
+    },
+    "chunk_max_characters": {
+      "type": "integer",
+      "minimum": 256,
+      "maximum": 20000
+    },
+    "documents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "url",
+          "source_type",
+          "content_format",
+          "product",
+          "product_version",
+          "license",
+          "knowledge_type",
+          "device_classes",
+          "topics",
+          "language",
+          "authority",
+          "validation_status"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_.-]{2,127}$"
+          },
+          "url": {"type": "string", "minLength": 1},
+          "source_type": {
+            "enum": [
+              "official_documentation",
+              "official_example",
+              "lab_document",
+              "validated_finding",
+              "local_fixture"
+            ]
+          },
+          "content_format": {"const": "html"},
+          "product": {"type": "string", "minLength": 1},
+          "product_version": {"type": "string", "minLength": 1},
+          "license": {"type": "string", "minLength": 1},
+          "knowledge_type": {
+            "enum": [
+              "api_reference",
+              "official_example",
+              "procedure",
+              "design_rule",
+              "troubleshooting",
+              "validation_finding",
+              "glossary",
+              "test_fixture"
+            ]
+          },
+          "device_classes": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$"}
+          },
+          "topics": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$"}
+          },
+          "language": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+          },
+          "authority": {
+            "enum": [
+              "official",
+              "lab_verified",
+              "warehouse_derived_verified",
+              "test_fixture"
+            ]
+          },
+          "validation_status": {
+            "enum": [
+              "source_verified",
+              "lab_verified",
+              "warehouse_verified",
+              "test_only"
+            ]
+          },
+          "evidence_refs": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 3}
+          }
+        }
+      }
+    }
+  }
+}

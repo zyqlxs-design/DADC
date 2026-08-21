@@ -1,0 +1,43 @@
+{
+  "data_stage_acceptance_version": "1.0",
+  "executed_at": "2026-08-21",
+  "tool_version": "1.7.0.dev0",
+  "evaluation_policy": "objective pass/fail evidence only; no subjective score",
+  "portable_status": "passed",
+  "portable_checks": {
+    "tests_run": 64,
+    "tests_passed": 64,
+    "tests_failed": 0,
+    "core_entity_schemas": 9,
+    "device_profiles": 6,
+    "registered_adapters": 6,
+    "knowledge_documents": 4,
+    "knowledge_chunks": 13,
+    "raw_knowledge_integrity_failures": 0,
+    "index_byte_identical_rebuild": true,
+    "device_partition_check": "passed",
+    "dadc_records": 57,
+    "artifacts": 16,
+    "data_references": 11,
+    "warehouse_validation_issues": 0,
+    "runs": 7,
+    "failed_runs_preserved": 1,
+    "trace_artifacts": 16,
+    "trace_provenance": 7,
+    "wheel_sha256": "2a5fa137bff7ff2764bc771db1ad6f61b541513fd78d5cfe27b609042634a5d1"
+  },
+  "not_executed": [
+    "physical_optimization_bundle_artifact_hashing",
+    "physical_warehouse_validation_and_metric_trace"
+  ],
+  "architecture_decision": "one knowledge platform with shared and device-scoped partitions",
+  "remaining_work": [
+    "official_content_expansion",
+    "additional_document_formats",
+    "bilingual_hybrid_retrieval",
+    "verified_knowledge_cards",
+    "data_communication_agent",
+    "surrogate_and_bayesian_tuning",
+    "numerical_and_experimental_validation"
+  ]
+}
