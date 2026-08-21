@@ -32,3 +32,5 @@ jobs:
         run: python scripts/run_minimal_extensible_validation.py --output-dir test-results/minimal-extensible-validation
       - name: Run objective data-stage acceptance
         run: python scripts/run_data_stage_acceptance.py --output-dir test-results/data-stage-acceptance
+      - name: Run bounded agent-tuning acceptance
+        run: python scripts/run_agent_tuning_acceptance.py --output-dir test-results/agent-tuning-acceptance

@@ -41,7 +41,9 @@ class SchemaRegistry:
     def _load(self, path: Path) -> dict[str, Any]:
         path = path.resolve()
         if path not in self._cache:
-            schema = json.loads(path.read_text(encoding="utf-8"))
+            # JSON Schema files can arrive from a Windows checkout with a UTF-8
+            # BOM.  Treat the BOM as transport encoding, not schema content.
+            schema = json.loads(path.read_text(encoding="utf-8-sig"))
             Draft202012Validator.check_schema(schema)
             self._cache[path] = schema
         return self._cache[path]

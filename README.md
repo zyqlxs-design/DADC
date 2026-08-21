@@ -1,6 +1,6 @@
 # DADC V1.0 数据仓库
 
-DADC V1.0 是一个可运行的异构器件工程数据仓库参考实现。它以九个冻结的一级实体为核心：`Device`、`DesignRevision`、`Study`、`Run`、`Observable`、`Metric`、`Artifact`、`Validation`、`Provenance`。天线、射频滤波器、电感和多物理场算例共享同一套核心 Schema；器件特有字段只进入独立的 profile 扩展，不进入全局横表。当前工具版本为 1.7.0.dev0，数据 Schema 仍固定为 1.0。
+DADC V1.0 是一个可运行的异构器件工程数据仓库参考实现。它以九个冻结的一级实体为核心：`Device`、`DesignRevision`、`Study`、`Run`、`Observable`、`Metric`、`Artifact`、`Validation`、`Provenance`。天线、射频滤波器、电感和多物理场算例共享同一套核心 Schema；器件特有字段只进入独立的 profile 扩展，不进入全局横表。当前工具版本为 1.8.0.dev0，数据 Schema 仍固定为 1.0。
 
 ## 快速运行
 
@@ -54,6 +54,9 @@ dadc knowledge-collect SOURCE_MANIFEST CORPUS_DIR
 dadc knowledge-index CORPUS_DIR
 dadc knowledge-search CORPUS_DIR QUERY
 dadc optimize OPTIMIZATION_PLAN OUTPUT_DIR
+dadc optimization-report OPTIMIZATION_BUNDLE OUTPUT_MARKDOWN
+dadc agent-plan AGENT_REQUEST CORPUS_DIR OUTPUT_DIR [--provider deepseek]
+dadc agent-tune AGENT_REQUEST CORPUS_DIR OUTPUT_DIR --approve-execution [--provider deepseek]
 ```
 
 `validate` 同时执行 JSON Schema、引用完整性、HDF5 数据引用、复数 real/imaginary 结构和 SHA-256 校验。删除或篡改任一受管 Artifact 时会返回非零退出码。
@@ -63,6 +66,8 @@ dadc optimize OPTIMIZATION_PLAN OUTPUT_DIR
 工具 1.6.0.dev0 新增独立于九对象事实库的可复现文档 corpus、可重建搜索投影、类型化仿真后端、预算化网格搜索、最优点独立复核，以及 `optimization_trace_bundle` 入库适配器。离线验收明确使用非物理解析夹具；真实后端只在 Windows + AEDT/PyAEDT 环境调用仓库固定的贴片天线脚本，不执行 LLM 生成的任意代码。架构边界、PowerShell 命令和真实运行前置条件见 [`docs/minimal-extensible-agent-loop.md`](docs/minimal-extensible-agent-loop.md)。
 
 工具 1.7.0.dev0 增加知识来源契约 V1.1、共享知识与器件分区元数据、按器件/知识类型/主题过滤的检索，以及不使用主观评分的数据阶段验收报告。不同器件共用一个知识平台：PyAEDT/HFSS 通用知识标记为 `shared`，天线、射频滤波器和电感知识按 `device_classes` 隔离。官方种子清单包含 13 个已确认的 PyAEDT/HFSS API 与案例页面。设计与验收命令见 [`docs/data-and-knowledge-stage.md`](docs/data-and-knowledge-stage.md)。
+
+工具 1.8.0.dev0 增加优化结果表格报告、知识证据与DADC历史试算上下文组装、DeepSeek JSON参数提议、参数白名单与预算校验、显式执行批准以及独立复算后的客观阈值判断。LLM只选择允许值，不能生成并直接执行任意求解代码。使用方法和能力边界见 [`docs/ai-assisted-tuning-stage.md`](docs/ai-assisted-tuning-stage.md)。
 
 ## 导入真实 HFSS Touchstone 数据
 
@@ -115,7 +120,7 @@ Touchstone 只包含网络结果及有限头信息，不能单独证明完整几
 & ".\.venv\Scripts\python.exe" -m dadc validate "F:\DADC_DATA\warehouse"
 ```
 
-判重使用源文件内容的 SHA-256，不使用文件名。因此同一文件改名后再次导入会返回 `duplicate`，不会创建第二个 Case。无法识别、元数据不足、解析失败、Case ID 冲突或 Schema 冲突的输入会按原字节复制到 `F:\DADC_DATA\quarantine`，不会进入 warehouse。成功追加先在 `staging` 中构建并完整校验，然后提交 Case 并重建 Parquet 索引；冻结的核心 Schema 不会被导入器改写。
+判重使用源文件内容的 SHA-256，不使用文件名。因此同一文件改名后再次导入会返回 `duplicate`，不会创建第二个 Case。无法识别、元数据不足、解析失败、Case ID 冲突或 Schema 冲突的输入会按原字节复制到 `F:\DADC_DATA\quarantine`，不会进入 warehouse。成功追加先在 `staging` 中构建并完整校验，然后提交 Case 并重建 Parquet 索引；冻结的核心 Schema 不会被导入器改写。JSON Schema 合并按规范化语义比较，允许 Windows/Linux 换行、缩进和 UTF-8 BOM 差异，但任何真实字段变化仍会被隔离。
 
 文件夹批量导入使用一个或多个 `*.dadc.json`。每份清单的 `source` 相对该清单定位，还可以通过 `companion_artifacts` 一起保存 `.aedt`、日志、网格和脚本等复现证据：
 

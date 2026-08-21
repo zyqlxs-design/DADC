@@ -724,8 +724,17 @@ def ingest_optimization_bundle_repository(
             "value_origin": "manual_entry",
             "provenance_id": provenance_ids[trial_id],
             "manual_entry_context": {
-                "source": "versioned optimization plan",
+                "source": (
+                    "bounded agent parameter proposal"
+                    if plan["device"]["attributes"].get("agent_planning")
+                    else "versioned optimization plan"
+                ),
                 "plan_sha256": bundle["plan_sha256"],
+                **(
+                    {"agent_planning": plan["device"]["attributes"]["agent_planning"]}
+                    if plan["device"]["attributes"].get("agent_planning")
+                    else {}
+                ),
             },
         }
         _write_record(root, case_id, parameter_observable)

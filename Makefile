@@ -1,4 +1,4 @@
-.PHONY: install demo real-demo validate test acceptance clean-demo
+.PHONY: install demo real-demo validate test acceptance agent-acceptance clean-demo
 
 install:
 	python3 -m pip install -e .
@@ -15,7 +15,10 @@ validate:
 test:
 	python3 -m unittest discover -s tests -v
 
-acceptance: demo test validate
+agent-acceptance:
+	python3 scripts/run_agent_tuning_acceptance.py --output-dir test-results/agent-tuning-acceptance
+
+acceptance: demo test validate agent-acceptance
 
 clean-demo:
 	python3 scripts/create_examples.py examples/generated --replace

@@ -179,6 +179,48 @@ def main(argv: list[str] | None = None) -> int:
     optimize_parser.add_argument("plan")
     optimize_parser.add_argument("target")
 
+    report_parser = subparsers.add_parser(
+        "optimization-report",
+        help="write a human-readable table from an optimization evidence bundle",
+    )
+    report_parser.add_argument("bundle")
+    report_parser.add_argument("output")
+
+    agent_plan_parser = subparsers.add_parser(
+        "agent-plan",
+        help="retrieve evidence and create a bounded optimization plan without executing it",
+    )
+    agent_plan_parser.add_argument("request")
+    agent_plan_parser.add_argument("corpus")
+    agent_plan_parser.add_argument("target")
+    agent_plan_parser.add_argument(
+        "--provider",
+        choices=("deterministic_fixture", "deepseek"),
+        default="deterministic_fixture",
+    )
+    agent_plan_parser.add_argument("--model")
+    agent_plan_parser.add_argument("--warehouse")
+
+    agent_tune_parser = subparsers.add_parser(
+        "agent-tune",
+        help="plan and run bounded tuning through an allow-listed backend",
+    )
+    agent_tune_parser.add_argument("request")
+    agent_tune_parser.add_argument("corpus")
+    agent_tune_parser.add_argument("target")
+    agent_tune_parser.add_argument(
+        "--provider",
+        choices=("deterministic_fixture", "deepseek"),
+        default="deterministic_fixture",
+    )
+    agent_tune_parser.add_argument("--model")
+    agent_tune_parser.add_argument("--warehouse")
+    agent_tune_parser.add_argument(
+        "--approve-execution",
+        action="store_true",
+        help="explicitly approve calls to the locked optimization backend",
+    )
+
     args = parser.parse_args(argv)
     if args.command == "create-demo":
         create_demo_repository(args.target, replace=args.replace)
@@ -310,6 +352,42 @@ def main(argv: list[str] | None = None) -> int:
 
         _print_json(run_optimization(args.plan, args.target))
         return 0
+    if args.command == "optimization-report":
+        from .automation import write_optimization_report
+
+        _print_json(write_optimization_report(args.bundle, args.output))
+        return 0
+    if args.command == "agent-plan":
+        from .agent import prepare_agent_plan
+
+        _print_json(
+            prepare_agent_plan(
+                args.request,
+                args.corpus,
+                args.target,
+                provider=args.provider,
+                model=args.model,
+                warehouse=args.warehouse,
+            )
+        )
+        return 0
+    if args.command == "agent-tune":
+        from .agent import run_agent_tuning
+
+        rendered = run_agent_tuning(
+            args.request,
+            args.corpus,
+            args.target,
+            provider=args.provider,
+            model=args.model,
+            warehouse=args.warehouse,
+            approve_execution=args.approve_execution,
+        )
+        _print_json(rendered)
+        ingestion = rendered.get("ingestion")
+        return 0 if rendered["status"] == "accepted" and (
+            ingestion is None or ingestion.get("status") in {"ingested", "duplicate"}
+        ) else 1
     return 2
 
 

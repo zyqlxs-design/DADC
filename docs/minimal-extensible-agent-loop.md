@@ -52,7 +52,7 @@ python -m dadc ingest `
 
 ## 抓取官方 PyAEDT 最小语料
 
-`examples/knowledge/pyaedt_official_sources.json` 只列出三个明确允许的官方页面；收集器会限制主机、单页字节数、超时和重定向目标。每次正式构建都应更新 `retrieved_at` 和 `product_version`，然后把完整 corpus 当作版本化文档快照保存。
+`examples/knowledge/pyaedt_official_sources.json` 当前列出13个经过确认的官方API与案例页面；收集器会限制主机、单页字节数、超时和重定向目标。每次正式构建都应更新 `retrieved_at` 和 `product_version`，然后把完整 corpus 当作版本化文档快照保存。
 
 ```powershell
 python -m dadc knowledge-collect `

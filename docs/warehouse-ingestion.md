@@ -41,7 +41,7 @@ Touchstone 适配器保留源复数格式说明，但 HDF5 统一保存 real/ima
 1. 源文件复制后的 SHA-256 与输入一致；
 2. staging 单案例仓库通过 Schema、引用、HDF5、Parquet 和 Artifact 完整性校验；
 3. Case ID 和全部实体 ID 与 warehouse 无冲突；
-4. 同名既有 Schema 的 SHA-256 完全一致；
+4. 同名既有 JSON Schema 规范化后的语义内容一致；仅换行、缩进或 UTF-8 BOM 差异可接受，真实字段变化拒绝；
 5. Case 提交后全局 Parquet 索引重建成功；
 6. 整个 warehouse 再次校验通过。
 

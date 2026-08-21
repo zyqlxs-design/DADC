@@ -1,3 +1,9 @@
 # Touchstone is immutable solver/measurement evidence. Preserve exact bytes,
 # including vendor and Windows line endings, on every platform.
 *.s*p binary
+
+# Keep source and contract text stable across Windows and Linux checkouts.
+*.json text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.yml text eol=lf

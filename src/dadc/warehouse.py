@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -168,6 +169,20 @@ class WarehouseManager:
         return {(entity_type, identifier) for entity_type, identifier, _, _ in scan_records(root)}
 
     @staticmethod
+    def _canonical_schema_sha256(path: Path) -> str:
+        """Hash JSON meaning, not checkout-specific whitespace or line endings."""
+
+        value = json.loads(path.read_text(encoding="utf-8-sig"))
+        canonical = json.dumps(
+            value,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+        return hashlib.sha256(canonical).hexdigest()
+
+    @staticmethod
     def _merge_schemas(staged: Path, warehouse: Path) -> list[Path]:
         added: list[Path] = []
         for source in sorted((staged / "schemas").rglob("*")):
@@ -176,7 +191,14 @@ class WarehouseManager:
             relative = source.relative_to(staged / "schemas")
             target = warehouse / "schemas" / relative
             if target.exists():
-                if sha256_file(source) != sha256_file(target):
+                if source.suffix.lower() == ".json" and target.suffix.lower() == ".json":
+                    equal = (
+                        WarehouseManager._canonical_schema_sha256(source)
+                        == WarehouseManager._canonical_schema_sha256(target)
+                    )
+                else:
+                    equal = sha256_file(source) == sha256_file(target)
+                if not equal:
                     raise ValueError(f"Schema conflict; existing schema is immutable: schemas/{relative.as_posix()}")
                 continue
             target.parent.mkdir(parents=True, exist_ok=True)

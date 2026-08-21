@@ -133,6 +133,48 @@ class SharedWarehouseTests(unittest.TestCase):
             antenna_revision["topology"]["reconstruction_status"],
         )
 
+    def test_schema_formatting_and_windows_line_endings_do_not_create_conflict(self) -> None:
+        first = self.manager.ingest(FIXTURE, _intake("warehouse_filter_001"))
+        self.assertEqual("ingested", first.status)
+        schema_path = self.warehouse / "schemas" / "v1.0" / "artifact.schema.json"
+        value = json.loads(schema_path.read_text(encoding="utf-8"))
+        windows_rendered = json.dumps(value, ensure_ascii=False, indent=4).replace("\n", "\r\n")
+        schema_path.write_bytes(b"\xef\xbb\xbf" + windows_rendered.encode("utf-8"))
+
+        antenna = self.data_root / "inbox" / "line_ending_patch.s1p"
+        antenna.write_text(
+            "! schema formatting compatibility fixture\n"
+            "# GHz S RI R 50\n"
+            "8 0.5 0\n"
+            "10 0.1 0\n"
+            "12 0.6 0\n",
+            encoding="utf-8",
+        )
+        second = self.manager.ingest(antenna, _antenna_intake("warehouse_antenna_001"))
+        self.assertEqual("ingested", second.status, second.to_dict())
+        self.assertTrue(DADCRepository(self.warehouse).validate().valid)
+
+    def test_semantically_changed_existing_schema_is_still_rejected(self) -> None:
+        first = self.manager.ingest(FIXTURE, _intake("warehouse_filter_001"))
+        self.assertEqual("ingested", first.status)
+        schema_path = self.warehouse / "schemas" / "v1.0" / "artifact.schema.json"
+        value = json.loads(schema_path.read_text(encoding="utf-8"))
+        value["title"] = "Semantically changed schema fixture"
+        schema_path.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        antenna = self.data_root / "inbox" / "semantic_conflict_patch.s1p"
+        antenna.write_text(
+            "! semantic schema conflict fixture\n"
+            "# GHz S RI R 50\n"
+            "8 0.5 0\n"
+            "10 0.1 0\n"
+            "12 0.6 0\n",
+            encoding="utf-8",
+        )
+        second = self.manager.ingest(antenna, _antenna_intake("warehouse_antenna_001"))
+        self.assertEqual("quarantined", second.status, second.to_dict())
+        self.assertIn("Schema conflict", str(second.message))
+
     def test_id_conflict_and_unknown_format_are_quarantined_without_mutation(self) -> None:
         first = self.manager.ingest(FIXTURE, _intake("warehouse_filter_001"))
         self.assertEqual("ingested", first.status)
