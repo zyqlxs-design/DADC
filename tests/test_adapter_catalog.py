@@ -24,6 +24,7 @@ class AdapterCatalogTests(unittest.TestCase):
         self.assertEqual(sorted(ids), ids)
         self.assertEqual(len(ids), len(set(ids)))
         self.assertIn("tabular_experiment_csv", ids)
+        self.assertIn("optimization_trace_bundle", ids)
         for adapter, capability in zip(
             sorted(registry.adapters, key=lambda item: item.adapter_id), catalog
         ):
@@ -33,8 +34,10 @@ class AdapterCatalogTests(unittest.TestCase):
             self.assertTrue(capability["activity_types"])
             self.assertTrue(capability["device_classes"])
             self.assertTrue(capability["physics_domains"])
-            self.assertTrue(capability["manifest_required"])
-            self.assertTrue(capability["required_intake_fields"])
+            self.assertIsInstance(capability["manifest_required"], bool)
+            self.assertIsInstance(capability["required_intake_fields"], list)
+            if capability["manifest_required"]:
+                self.assertTrue(capability["required_intake_fields"])
 
     def test_cli_prints_machine_readable_adapter_catalog(self) -> None:
         output = io.StringIO()
@@ -43,7 +46,7 @@ class AdapterCatalogTests(unittest.TestCase):
         self.assertEqual(0, status)
         rendered = json.loads(output.getvalue())
         self.assertEqual("1.0", rendered["adapter_catalog_version"])
-        self.assertEqual(5, len(rendered["adapters"]))
+        self.assertEqual(6, len(rendered["adapters"]))
 
 
 if __name__ == "__main__":

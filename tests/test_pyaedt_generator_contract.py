@@ -47,6 +47,17 @@ class PyAedtGeneratorContractTests(unittest.TestCase):
         with self.assertRaises(argparse.ArgumentTypeError):
             self.generator._source_timezone_offset("Asia/Shanghai")
 
+    def test_tuning_parameters_are_rejected_before_solver_launch(self) -> None:
+        self.assertEqual(9.57, self.generator._positive_mm("9.57"))
+        self.assertEqual(0.485, self.generator._unit_interval("0.485"))
+        self.assertEqual("patch_trial_001", self.generator._case_id("patch_trial_001"))
+        with self.assertRaises(argparse.ArgumentTypeError):
+            self.generator._positive_mm("0")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            self.generator._unit_interval("1")
+        with self.assertRaises(argparse.ArgumentTypeError):
+            self.generator._case_id("Unsafe-Case")
+
 
 if __name__ == "__main__":
     unittest.main()

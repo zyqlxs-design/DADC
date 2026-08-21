@@ -1,0 +1,61 @@
+{
+  "minimal_extensible_validation_version": "1.0",
+  "executed_at": "2026-08-21",
+  "status": "passed",
+  "repository_baseline": {
+    "starting_commit": "49b0ef3",
+    "public_issues_observed": 0,
+    "frozen_dadc_schema_version": "1.0",
+    "core_schema_files_modified": 0
+  },
+  "regression": {
+    "tests_run": 63,
+    "tests_passed": 63,
+    "tests_failed": 0,
+    "duration_seconds": 19.722,
+    "preexisting_cross_platform_failures_resolved": 2,
+    "touchstone_fixture_sha256": "6b8c8e41071e29f262ac3c67cea69a01b81af1cd7d646857108ffc1fbffbe620"
+  },
+  "vertical_slice": {
+    "knowledge_documents": 1,
+    "knowledge_chunks": 4,
+    "search_trials": 5,
+    "intentionally_failed_trials_preserved": 1,
+    "independent_verification_trials": 1,
+    "dadc_records": 57,
+    "metric_trace_artifacts": 16,
+    "best_metric": {
+      "quantity": "analytic_mismatch_score",
+      "value": 0.25,
+      "unit": "score"
+    }
+  },
+  "verified": [
+    "controlled HTML collection preserves content-addressed raw bytes and semantic locators",
+    "search vectors rebuild deterministically from canonical chunks and are not authoritative",
+    "typed simulation jobs reject unknown PyAEDT patch parameters before launch",
+    "grid search obeys its declared trial budget",
+    "the selected point is rerun independently and is excluded from best-point selection",
+    "failed calls remain failed optimization_step Runs with evidence",
+    "optimization bundle artifacts are size- and SHA-256-pinned before warehouse mutation",
+    "a tampered companion is quarantined and no warehouse is created",
+    "normalized optimization metrics trace through Observables, Runs, Artifacts, and Provenance",
+    "all existing and new repository tests pass after exact Touchstone bytes are preserved"
+  ],
+  "claim_boundary": {
+    "hfss_executed_in_this_validation": false,
+    "reason": "the validation host is Linux and has no local AEDT installation",
+    "pyaedt_backend_preflight": "implemented and correctly reports Windows/AEDT as the next execution boundary",
+    "not_proven": [
+      "AEDT installation or license availability",
+      "HFSS numerical validity",
+      "solver convergence or mesh independence for an optimization result",
+      "cross-solver agreement",
+      "experimental agreement"
+    ]
+  },
+  "reproduction": {
+    "minimal_loop": "python scripts/run_minimal_extensible_validation.py --output-dir OUTPUT_DIR",
+    "tests": "python -m unittest discover -s tests -v"
+  }
+}

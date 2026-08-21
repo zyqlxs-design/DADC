@@ -1,0 +1,56 @@
+{
+  "optimization_plan_version": "1.0",
+  "optimization_id": "pyaedt_patch_tuning_001",
+  "case_id": "pyaedt_patch_tuning_001",
+  "created_at": "2026-08-21T02:00:00Z",
+  "device": {
+    "name": "PyAEDT probe-fed patch tuning study",
+    "device_class": "antenna",
+    "device_subtype": "probe_fed_patch_antenna",
+    "attributes": {
+      "recipe": "repository fixed Stackup3D patch recipe"
+    }
+  },
+  "physics_domains": ["electromagnetics"],
+  "strategy": "grid",
+  "parameters": [
+    {
+      "name": "patch_length_mm",
+      "unit": "mm",
+      "values": [9.3, 9.57, 9.8]
+    },
+    {
+      "name": "probe_relative_x_offset",
+      "unit": "1",
+      "values": [0.46, 0.485, 0.51]
+    }
+  ],
+  "objective": {
+    "name": "10 GHz resonance error",
+    "quantity": "target_frequency_error_hz",
+    "unit": "Hz",
+    "goal": "minimize",
+    "target": 10000000000.0
+  },
+  "budget": {
+    "max_search_trials": 9,
+    "independent_verification_runs": 1
+  },
+  "backend": {
+    "type": "pyaedt_patch",
+    "options": {
+      "aedt_version": "2025.2",
+      "source_timezone": "+08:00",
+      "operator_id": "local_user",
+      "cores": 2,
+      "non_graphical": true,
+      "timeout_seconds": 7200,
+      "target_frequency_hz": 10000000000.0
+    }
+  },
+  "execution": {
+    "platform": "Windows with AEDT Student",
+    "compute": "local AEDT; two requested cores",
+    "timeout_seconds": 7200
+  }
+}

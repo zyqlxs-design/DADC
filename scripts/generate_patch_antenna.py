@@ -33,6 +33,26 @@ def _source_timezone_offset(value: str) -> str:
     return value
 
 
+def _positive_mm(value: str) -> float:
+    parsed = float(value)
+    if parsed <= 0.0:
+        raise argparse.ArgumentTypeError("millimetre dimensions must be positive")
+    return parsed
+
+
+def _unit_interval(value: str) -> float:
+    parsed = float(value)
+    if not 0.0 < parsed < 1.0:
+        raise argparse.ArgumentTypeError("relative probe offset must be between 0 and 1")
+    return parsed
+
+
+def _case_id(value: str) -> str:
+    if not re.fullmatch(r"[a-z][a-z0-9_]{2,63}", value):
+        raise argparse.ArgumentTypeError("case id must match [a-z][a-z0-9_]{2,63}")
+    return value
+
+
 def _companion_candidates(
     output_dir: Path,
     project_path: Path,
@@ -58,6 +78,11 @@ def main() -> int:
     parser.add_argument("--non-graphical", action="store_true")
     parser.add_argument("--source-timezone", required=True, type=_source_timezone_offset)
     parser.add_argument("--operator-id", default="local_user")
+    parser.add_argument("--case-id", default="pyaedt_patch_antenna_real_001", type=_case_id)
+    parser.add_argument("--device-name", default="PyAEDT probe-fed 10 GHz patch antenna")
+    parser.add_argument("--patch-length-mm", type=_positive_mm, default=9.57)
+    parser.add_argument("--patch-width-mm", type=_positive_mm, default=9.25)
+    parser.add_argument("--probe-relative-x-offset", type=_unit_interval, default=0.485)
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir).resolve()
@@ -87,12 +112,12 @@ def main() -> int:
             "solution_frequency": "10GHz",
             "sweep_start": "8GHz",
             "sweep_stop": "12GHz",
-            "patch_length": "9.57mm",
-            "patch_width": "9.25mm",
+            "patch_length": f"{args.patch_length_mm}mm",
+            "patch_width": f"{args.patch_width_mm}mm",
             "substrate_thickness": "0.5mm",
             "substrate_material": "Duroid (tm)",
             "conductor_material": "copper",
-            "probe_relative_x_offset": 0.485,
+            "probe_relative_x_offset": args.probe_relative_x_offset,
         },
     }
     hfss = None
@@ -129,8 +154,8 @@ def main() -> int:
             "signal", material="copper", thickness=0.035, fill_material="air"
         )
         patch = signal.add_patch(
-            patch_length=9.57,
-            patch_width=9.25,
+            patch_length=args.patch_length_mm,
+            patch_width=args.patch_width_mm,
             patch_name="Patch",
             frequency=1.0e10,
         )
@@ -142,7 +167,9 @@ def main() -> int:
         # actually returns None even when AEDT creates the excitation. Verify
         # the resulting AEDT state instead of treating the return value as a
         # success flag.
-        probe_result = patch.create_probe_port(ground, rel_x_offset=0.485)
+        probe_result = patch.create_probe_port(
+            ground, rel_x_offset=args.probe_relative_x_offset
+        )
         probe_excitations = list(hfss.excitation_names)
         manifest["probe_port_creation"] = {
             "api_return": repr(probe_result),
@@ -242,8 +269,8 @@ def main() -> int:
                 "intake_schema_version": "1.0",
                 "source": touchstone_path.name,
                 "adapter": "touchstone_antenna",
-                "case_id": "pyaedt_patch_antenna_real_001",
-                "device_name": "PyAEDT probe-fed 10 GHz patch antenna",
+                "case_id": args.case_id,
+                "device_name": args.device_name,
                 "device_class": "antenna",
                 "device_subtype": "probe_fed_patch_antenna",
                 "activity_type": "simulation_run",

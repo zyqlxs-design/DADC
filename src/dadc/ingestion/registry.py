@@ -16,6 +16,7 @@ from .importer import (
     ingest_touchstone_inductor_repository,
 )
 from .field_bundle import FieldBundleIngestionResult, ingest_joule_thermal_field_bundle
+from .optimization import OptimizationIngestionResult, ingest_optimization_bundle_repository
 from .tabular import TabularIngestionResult, ingest_tabular_experiment_repository
 
 _TOUCHSTONE_SUFFIX = re.compile(r"\.s(?P<ports>[1-9][0-9]*)p$", re.IGNORECASE)
@@ -73,7 +74,12 @@ class SourceAdapter(Protocol):
         source: Path,
         target: Path,
         intake: dict[str, Any],
-    ) -> TouchstoneIngestionResult | FieldBundleIngestionResult | TabularIngestionResult:
+    ) -> (
+        TouchstoneIngestionResult
+        | FieldBundleIngestionResult
+        | TabularIngestionResult
+        | OptimizationIngestionResult
+    ):
         """Build and validate one staged DADC repository."""
 
 
@@ -468,6 +474,52 @@ class TabularExperimentCSVAdapter:
         return ingest_tabular_experiment_repository(source, target, intake=intake)
 
 
+class OptimizationTraceBundleAdapter:
+    """Ingest a hash-pinned trace produced by the controlled optimizer."""
+
+    adapter_id = "optimization_trace_bundle"
+    adapter_version = "1.0.0"
+    capability = AdapterCapability(
+        adapter_id=adapter_id,
+        adapter_version=adapter_version,
+        source_kinds=("optimization_evidence_bundle",),
+        source_formats=("DADC optimization trace JSON V1.0",),
+        device_classes=("generic_component", "antenna"),
+        activity_types=("optimization_step", "data_processing"),
+        physics_domains=("electromagnetics", "thermal", "structural", "optical"),
+        automation_level="automatic_from_hash_pinned_bundle",
+        manifest_required=False,
+        required_intake_fields=(),
+        maturity="minimal_extensible_validation",
+    )
+
+    def probe(self, source: Path, intake: dict[str, Any]) -> ProbeResult:
+        del intake
+        if source.suffix.lower() != ".json":
+            return ProbeResult(self.adapter_id, 0.0, "optimization bundle requires JSON")
+        try:
+            value = json.loads(source.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            return ProbeResult(self.adapter_id, 0.0, f"cannot parse JSON: {exc}")
+        if value.get("bundle_type") != "dadc_optimization_trace":
+            return ProbeResult(self.adapter_id, 0.0, "bundle_type is not dadc_optimization_trace")
+        if value.get("optimization_bundle_version") != "1.0":
+            return ProbeResult(self.adapter_id, 0.60, "unsupported optimization bundle version")
+        return ProbeResult(
+            self.adapter_id,
+            1.0,
+            "typed DADC optimization trace V1.0 with companion evidence",
+        )
+
+    def build_case_repository(
+        self,
+        source: Path,
+        target: Path,
+        intake: dict[str, Any],
+    ) -> OptimizationIngestionResult:
+        return ingest_optimization_bundle_repository(source, target, intake=intake)
+
+
 class AdapterRegistry:
     """Select exactly one adapter; ambiguous and unknown inputs are rejected."""
 
@@ -478,6 +530,7 @@ class AdapterRegistry:
             TouchstoneInductorAdapter(),
             JouleThermalFieldBundleAdapter(),
             TabularExperimentCSVAdapter(),
+            OptimizationTraceBundleAdapter(),
         ]
 
     def catalog(self) -> list[dict[str, Any]]:

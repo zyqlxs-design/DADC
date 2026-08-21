@@ -147,6 +147,35 @@ def main(argv: list[str] | None = None) -> int:
     )
     ingest_parser.add_argument("--processed-at")
 
+    collect_parser = subparsers.add_parser(
+        "knowledge-collect",
+        help="collect a controlled documentation source manifest into an immutable corpus",
+    )
+    collect_parser.add_argument("manifest")
+    collect_parser.add_argument("target")
+
+    index_parser = subparsers.add_parser(
+        "knowledge-index",
+        help="rebuild a local search projection from corpus chunks",
+    )
+    index_parser.add_argument("corpus")
+    index_parser.add_argument("--dimensions", type=int, default=512)
+
+    search_parser = subparsers.add_parser(
+        "knowledge-search",
+        help="search a corpus and return source-addressable evidence",
+    )
+    search_parser.add_argument("corpus")
+    search_parser.add_argument("query")
+    search_parser.add_argument("--top-k", type=int, default=5)
+
+    optimize_parser = subparsers.add_parser(
+        "optimize",
+        help="run a budgeted typed optimization plan and write an ingestible evidence bundle",
+    )
+    optimize_parser.add_argument("plan")
+    optimize_parser.add_argument("target")
+
     args = parser.parse_args(argv)
     if args.command == "create-demo":
         create_demo_repository(args.target, replace=args.replace)
@@ -241,6 +270,31 @@ def main(argv: list[str] | None = None) -> int:
         result = manager.ingest(source, _ingest_cli_values(args))
         _print_json(result.to_dict())
         return 1 if result.status == "quarantined" else 0
+    if args.command == "knowledge-collect":
+        from .knowledge import collect_corpus
+
+        _print_json(collect_corpus(args.manifest, args.target))
+        return 0
+    if args.command == "knowledge-index":
+        from .knowledge import build_index
+
+        _print_json(build_index(args.corpus, dimensions=args.dimensions))
+        return 0
+    if args.command == "knowledge-search":
+        from .knowledge import search_index
+
+        _print_json(
+            {
+                "query": args.query,
+                "results": search_index(args.corpus, args.query, top_k=args.top_k),
+            }
+        )
+        return 0
+    if args.command == "optimize":
+        from .automation import run_optimization
+
+        _print_json(run_optimization(args.plan, args.target))
+        return 0
     return 2
 
 

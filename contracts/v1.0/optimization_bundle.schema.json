@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/contracts/v1.0/optimization_bundle.schema.json",
+  "title": "DADC optimization evidence bundle V1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["bundle_type", "optimization_bundle_version", "created_at", "finished_at", "plan", "plan_sha256", "backend", "preflight", "search_trials", "verification_trials", "best_search_trial_id", "budget", "artifacts"],
+  "$defs": {
+    "trial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trial_id", "trial_kind", "job", "status", "started_at", "ended_at", "metric", "artifact_paths"],
+      "properties": {
+        "trial_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "trial_kind": {"enum": ["search", "independent_verification"]},
+        "job": {"type": "object"},
+        "status": {"enum": ["succeeded", "failed"]},
+        "started_at": {"type": "string", "format": "date-time"},
+        "ended_at": {"type": "string", "format": "date-time"},
+        "metric": {
+          "type": ["object", "null"],
+          "properties": {
+            "name": {"type": "string"},
+            "quantity": {"type": "string"},
+            "value": {"type": "number"},
+            "unit": {"type": "string"}
+          },
+          "required": ["name", "quantity", "value", "unit"]
+        },
+        "error": {"type": "string"},
+        "artifact_paths": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relative_path", "sha256", "size_bytes", "role", "media_type", "value_origin", "trial_id"],
+      "properties": {
+        "relative_path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "role": {"enum": ["native_project", "raw_input", "mesh", "solver_log", "script", "result_hdf5", "validation_evidence", "report", "measurement_data", "literature_source"]},
+        "media_type": {"type": "string", "minLength": 1},
+        "value_origin": {"enum": ["raw_solver_output", "raw_experiment_output", "literature_extracted", "calculated", "manual_entry"]},
+        "trial_id": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "properties": {
+    "bundle_type": {"const": "dadc_optimization_trace"},
+    "optimization_bundle_version": {"const": "1.0"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "finished_at": {"type": "string", "format": "date-time"},
+    "plan": {"type": "object"},
+    "plan_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["backend_id", "backend_version", "is_physical_solver", "evidence_level"],
+      "properties": {
+        "backend_id": {"type": "string"},
+        "backend_version": {"type": "string"},
+        "is_physical_solver": {"type": "boolean"},
+        "evidence_level": {"type": "string"}
+      }
+    },
+    "preflight": {"type": "object", "minProperties": 1},
+    "search_trials": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/trial"}},
+    "verification_trials": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/trial"}},
+    "best_search_trial_id": {"type": "string", "minLength": 1},
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_search_trials", "search_trials_executed", "independent_verification_runs", "verification_runs_executed"],
+      "properties": {
+        "max_search_trials": {"type": "integer", "minimum": 1},
+        "search_trials_executed": {"type": "integer", "minimum": 1},
+        "independent_verification_runs": {"type": "integer", "minimum": 1},
+        "verification_runs_executed": {"type": "integer", "minimum": 1}
+      }
+    },
+    "artifacts": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/artifact"}}
+  }
+}

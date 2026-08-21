@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/contracts/v1.0/optimization_plan.schema.json",
+  "title": "DADC deterministic optimization plan V1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["optimization_plan_version", "optimization_id", "case_id", "created_at", "device", "physics_domains", "strategy", "parameters", "objective", "budget", "backend", "execution"],
+  "properties": {
+    "optimization_plan_version": {"const": "1.0"},
+    "optimization_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$"},
+    "case_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "device_class", "device_subtype", "attributes"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "device_class": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "device_subtype": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "attributes": {"type": "object"}
+      }
+    },
+    "physics_domains": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"enum": ["electromagnetics", "thermal", "structural", "acoustics", "fluid", "optical", "quantum", "chemical"]}
+    },
+    "strategy": {"const": "grid"},
+    "parameters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "unit", "values"],
+        "properties": {
+          "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "unit": {"type": "string", "minLength": 1},
+          "values": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "number"}}
+        }
+      }
+    },
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "quantity", "unit", "goal"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "quantity": {"type": "string", "minLength": 1},
+        "unit": {"type": "string", "minLength": 1},
+        "goal": {"enum": ["minimize", "maximize", "target"]},
+        "target": {"type": "number"}
+      },
+      "allOf": [
+        {"if": {"properties": {"goal": {"const": "target"}}}, "then": {"required": ["target"]}}
+      ]
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_search_trials", "independent_verification_runs"],
+      "properties": {
+        "max_search_trials": {"type": "integer", "minimum": 1},
+        "independent_verification_runs": {"type": "integer", "minimum": 1, "maximum": 10}
+      }
+    },
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "options"],
+      "properties": {
+        "type": {"enum": ["analytic_fixture", "pyaedt_patch"]},
+        "options": {"type": "object"}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "compute"],
+      "properties": {
+        "platform": {"type": "string", "minLength": 1},
+        "compute": {"type": "string", "minLength": 1},
+        "timeout_seconds": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

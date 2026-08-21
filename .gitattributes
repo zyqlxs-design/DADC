@@ -1,0 +1,3 @@
+# Touchstone is immutable solver/measurement evidence. Preserve exact bytes,
+# including vendor and Windows line endings, on every platform.
+*.s*p binary

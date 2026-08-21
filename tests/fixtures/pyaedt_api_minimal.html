@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+  <head><title>PyAEDT Hfss API fixture</title></head>
+  <body>
+    <h1>Hfss setup workflow</h1>
+    <p>Create a setup with Hfss.create_setup and then configure a frequency sweep.</p>
+    <pre><code>setup = hfss.create_setup(name="Setup1", Frequency="10GHz")
+sweep = setup.create_frequency_sweep(
+    unit="GHz", start_frequency=8, stop_frequency=12
+)</code></pre>
+    <h2>Export solver evidence</h2>
+    <p>Use export_touchstone after analyze succeeds. Preserve the project, sweep, and logs.</p>
+  </body>
+</html>

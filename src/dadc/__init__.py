@@ -12,7 +12,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from .repository import DADCRepository, ValidationReport
 
 __all__ = ["DADCRepository", "ValidationReport"]
-__version__ = "1.5.0"
+__version__ = "1.6.0.dev0"
 
 
 def __getattr__(name: str) -> Any:

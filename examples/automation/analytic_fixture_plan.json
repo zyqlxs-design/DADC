@@ -1,0 +1,65 @@
+{
+  "optimization_plan_version": "1.0",
+  "optimization_id": "mvp_optimization_001",
+  "case_id": "mvp_optimization_001",
+  "created_at": "2026-08-21T02:00:00Z",
+  "device": {
+    "name": "Non-physical optimization contract fixture",
+    "device_class": "generic_component",
+    "device_subtype": "analytic_contract_fixture",
+    "attributes": {
+      "purpose": "CI validation of crawler-to-executor-to-DADC orchestration",
+      "physical_claims_allowed": false
+    }
+  },
+  "physics_domains": ["electromagnetics"],
+  "strategy": "grid",
+  "parameters": [
+    {
+      "name": "patch_length_mm",
+      "unit": "mm",
+      "values": [9.0, 10.0, 11.0]
+    },
+    {
+      "name": "patch_width_mm",
+      "unit": "mm",
+      "values": [4.0, 5.0]
+    }
+  ],
+  "objective": {
+    "name": "analytic mismatch score",
+    "quantity": "analytic_mismatch_score",
+    "unit": "score",
+    "goal": "minimize"
+  },
+  "budget": {
+    "max_search_trials": 5,
+    "independent_verification_runs": 1
+  },
+  "backend": {
+    "type": "analytic_fixture",
+    "options": {
+      "centers": {
+        "patch_length_mm": 10.0,
+        "patch_width_mm": 5.0
+      },
+      "weights": {
+        "patch_length_mm": 1.0,
+        "patch_width_mm": 2.0
+      },
+      "offset": 0.25,
+      "fail_when": [
+        {
+          "patch_length_mm": 9.0,
+          "patch_width_mm": 4.0
+        }
+      ],
+      "operator_id": "ci_contract"
+    }
+  },
+  "execution": {
+    "platform": "portable_python_ci",
+    "compute": "single_process_cpu",
+    "timeout_seconds": 60
+  }
+}

@@ -1,6 +1,6 @@
 # DADC V1.0 数据仓库
 
-DADC V1.0 是一个可运行的异构器件工程数据仓库参考实现。它以九个冻结的一级实体为核心：`Device`、`DesignRevision`、`Study`、`Run`、`Observable`、`Metric`、`Artifact`、`Validation`、`Provenance`。天线、射频滤波器、电感和多物理场算例共享同一套核心 Schema；器件特有字段只进入独立的 profile 扩展，不进入全局横表。当前工具版本为 1.4.0，数据 Schema 仍固定为 1.0。
+DADC V1.0 是一个可运行的异构器件工程数据仓库参考实现。它以九个冻结的一级实体为核心：`Device`、`DesignRevision`、`Study`、`Run`、`Observable`、`Metric`、`Artifact`、`Validation`、`Provenance`。天线、射频滤波器、电感和多物理场算例共享同一套核心 Schema；器件特有字段只进入独立的 profile 扩展，不进入全局横表。当前工具版本为 1.6.0.dev0，数据 Schema 仍固定为 1.0。
 
 ## 快速运行
 
@@ -21,7 +21,7 @@ python3 -m dadc validate examples/generated
 make acceptance
 ```
 
-`.github/workflows/acceptance.yml` 会在 Python 3.10 与 3.12 上重复执行同一套生成、10 项测试和仓库总校验。
+`.github/workflows/acceptance.yml` 会在 Python 3.10 与 3.12 上重复执行完整测试、仓库总校验和最小智能闭环验收。
 
 示例生成器拒绝覆盖非空目录。如需明确重建示例，使用：
 
@@ -50,9 +50,17 @@ dadc migrate INPUT_JSON OUTPUT_JSON --target 1.0
 dadc ingest-touchstone SOURCE.s2p TARGET_DIR --case-id CASE_ID --device-name NAME --filter-order N --source-timezone +08:00
 dadc init-warehouse DATA_ROOT
 dadc ingest SOURCE --warehouse DATA_ROOT/warehouse [intake options]
+dadc knowledge-collect SOURCE_MANIFEST CORPUS_DIR
+dadc knowledge-index CORPUS_DIR
+dadc knowledge-search CORPUS_DIR QUERY
+dadc optimize OPTIMIZATION_PLAN OUTPUT_DIR
 ```
 
 `validate` 同时执行 JSON Schema、引用完整性、HDF5 数据引用、复数 real/imaginary 结构和 SHA-256 校验。删除或篡改任一受管 Artifact 时会返回非零退出码。
+
+## 文档知识、受控调用与自动调优最小闭环
+
+工具 1.6.0.dev0 新增独立于九对象事实库的可复现文档 corpus、可重建搜索投影、类型化仿真后端、预算化网格搜索、最优点独立复核，以及 `optimization_trace_bundle` 入库适配器。离线验收明确使用非物理解析夹具；真实后端只在 Windows + AEDT/PyAEDT 环境调用仓库固定的贴片天线脚本，不执行 LLM 生成的任意代码。架构边界、PowerShell 命令和真实运行前置条件见 [`docs/minimal-extensible-agent-loop.md`](docs/minimal-extensible-agent-loop.md)。
 
 ## 导入真实 HFSS Touchstone 数据
 

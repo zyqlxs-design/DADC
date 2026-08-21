@@ -28,3 +28,5 @@ jobs:
         run: |
           python -m dadc ingest-touchstone tests/fixtures/bandpass_filter_run_001_HFSSDesign1.s2p examples/real_hfss --case-id hfss_bandpass_real_001 --device-name "HFSS official interdigital bandpass filter" --filter-order 8 --source-timezone +08:00
           python -m dadc validate examples/real_hfss
+      - name: Run minimal extensible agent-loop validation
+        run: python scripts/run_minimal_extensible_validation.py --output-dir test-results/minimal-extensible-validation
