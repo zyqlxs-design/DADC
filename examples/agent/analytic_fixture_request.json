@@ -1,0 +1,32 @@
+{
+  "agent_tuning_request_version": "1.0",
+  "request_id": "agent_fixture_tuning_001",
+  "created_at": "2026-08-21T07:00:00Z",
+  "user_goal": "验证知识检索、参数提议、边界检查、自动执行和独立复核闭环。",
+  "device_class": "generic_component",
+  "knowledge_query": "Hfss create setup frequency sweep parameter validation",
+  "knowledge_top_k": 3,
+  "plan_template": "../automation/analytic_fixture_plan.json",
+  "parameter_policy": [
+    {
+      "name": "patch_length_mm",
+      "unit": "mm",
+      "allowed_values": [10.0, 9.0, 11.0],
+      "max_selected_values": 2
+    },
+    {
+      "name": "patch_width_mm",
+      "unit": "mm",
+      "allowed_values": [5.0, 4.0],
+      "max_selected_values": 2
+    }
+  ],
+  "acceptance": {
+    "quantity": "analytic_mismatch_score",
+    "operator": "<=",
+    "value": 0.25,
+    "unit": "score",
+    "require_physical_solver": false,
+    "require_independent_verification": true
+  }
+}

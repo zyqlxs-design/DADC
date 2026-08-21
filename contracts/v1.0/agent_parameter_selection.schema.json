@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dadc.example/contracts/v1.0/agent_parameter_selection.schema.json",
+  "title": "DADC bounded agent parameter selection V1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agent_parameter_selection_version",
+    "selected_values",
+    "knowledge_chunk_ids",
+    "rationale"
+  ],
+  "properties": {
+    "agent_parameter_selection_version": {"const": "1.0"},
+    "selected_values": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "values"],
+        "properties": {
+          "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "values": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "number"}
+          }
+        }
+      }
+    },
+    "knowledge_chunk_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "rationale": {"type": "string", "minLength": 1, "maxLength": 4000}
+  }
+}

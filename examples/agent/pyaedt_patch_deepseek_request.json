@@ -1,0 +1,32 @@
+{
+  "agent_tuning_request_version": "1.0",
+  "request_id": "pyaedt_patch_ai_tuning_001",
+  "created_at": "2026-08-21T07:00:00Z",
+  "user_goal": "使用受约束的参数搜索，使探针馈电贴片天线的谐振频率接近10 GHz。",
+  "device_class": "antenna",
+  "knowledge_query": "probe fed patch antenna geometry resonance setup frequency sweep convergence",
+  "knowledge_top_k": 5,
+  "plan_template": "../automation/pyaedt_patch_plan.json",
+  "parameter_policy": [
+    {
+      "name": "patch_length_mm",
+      "unit": "mm",
+      "allowed_values": [9.3, 9.45, 9.57, 9.7, 9.8],
+      "max_selected_values": 2
+    },
+    {
+      "name": "probe_relative_x_offset",
+      "unit": "1",
+      "allowed_values": [0.46, 0.475, 0.485, 0.5, 0.51],
+      "max_selected_values": 2
+    }
+  ],
+  "acceptance": {
+    "quantity": "target_frequency_error_hz",
+    "operator": "<=",
+    "value": 50000000.0,
+    "unit": "Hz",
+    "require_physical_solver": true,
+    "require_independent_verification": true
+  }
+}

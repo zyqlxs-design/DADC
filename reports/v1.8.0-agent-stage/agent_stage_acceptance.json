@@ -1,0 +1,35 @@
+{
+  "release": "1.8.0.dev0",
+  "overall_status": "passed",
+  "evaluation_policy": "objective pass/fail checks only; no subjective score",
+  "automated_tests": {
+    "passed": 73,
+    "failed": 0
+  },
+  "accepted": [
+    "knowledge_evidence_context",
+    "device_matched_dadc_optimization_history",
+    "agent_parameter_selection_contract",
+    "parameter_allow_list_and_budget_gate",
+    "explicit_execution_approval",
+    "test_knowledge_physical_execution_isolation",
+    "failed_trial_preservation",
+    "independent_best_point_verification",
+    "objective_acceptance_threshold",
+    "human_readable_optimization_report",
+    "agent_decision_provenance",
+    "cross_platform_schema_semantic_equality"
+  ],
+  "not_executed_here": [
+    "live_deepseek_api_call",
+    "windows_pyaedt_physical_agent_tuning"
+  ],
+  "remaining": [
+    "iterative_active_learning",
+    "surrogate_model",
+    "bayesian_optimization",
+    "mesh_independence",
+    "cross_solver_validation",
+    "experimental_validation"
+  ]
+}
